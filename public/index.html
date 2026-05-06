@@ -511,7 +511,7 @@
       <span class="badge badge-red">Zero Cost</span>
     </div>
     <div class="header-links">
-      <a href="https://github.com/izaart95-jpg/Kilo-Free-API" target="_blank">GitHub ↗</a>
+      <a href="https://github.com/search?q=kilo-free-api" target="_blank">GitHub ↗</a>
       <a href="https://api.kilo.ai/api/openrouter/models" target="_blank">Models API ↗</a>
     </div>
   </header>
@@ -731,22 +731,39 @@ function selectModel(id, label, sub) {
   });
 }
 
+// ── Hardcoded fallback models ─────────────────────────────────────────────────
+const HARDCODED_MODELS = [
+  'inclusionai/ling-2.6-1t:free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'poolside/laguna-m.1:free',
+  'x-ai/grok-code-fast-1:optimized:free',
+  'stepfun/step-3.5-flash:free',
+  'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+];
+
 // ── Load models ───────────────────────────────────────────────────────────────
 async function loadModels() {
   try {
     const res  = await fetch(proxify1(`${KILO_BASE}/models`));
     const json = await res.json();
-    const free = json.data
+    const fetched = json.data
       .filter(m => m.id.includes(':free'))
-      .map(m => m.id)
-      .sort();
+      .map(m => m.id);
+    // merge hardcoded extras, dedupe, sort
+    const free = [...new Set([...fetched, ...HARDCODED_MODELS])].sort();
 
     buildCustomSelect(free);
     document.getElementById('modelCount').innerHTML =
       `<span>${free.length}</span> free models available`;
   } catch(e) {
-    document.getElementById('modelWrap').innerHTML =
-      `<div class="model-loading" style="color:var(--accent3)">Failed to load models</div>`;
+    // Show inline notification, then fall back to hardcoded list
+    const countEl = document.getElementById('modelCount');
+    countEl.innerHTML =
+      `<span style="color:var(--accent3)">⚠ Model list unavailable</span><br>
+       <span style="color:var(--text-muted);font-size:9px;line-height:1.6">
+         CSP blocked the models endpoint<br>(e.g. GitHub Pages). Using built-in list.
+       </span>`;
+    buildCustomSelect([...HARDCODED_MODELS].sort());
   }
 }
 
