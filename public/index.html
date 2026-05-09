@@ -1,19 +1,28 @@
-<!DOCTYPE html>                                                                                                  <html lang="en">
-<head>                                                                                                           <meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kilo-Free-API · Live Playground</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ═══════════════════════════════════════════════════════════════════════════════
+     KILO-FREE-API · PRODUCTION BUILD v2.0
+     Dark cyberpunk chat playground — pure static HTML/CSS/JS
+     ═══════════════════════════════════════════════════════════════════════════════ */
+
   :root {
     --bg: #0a0a0f;
     --surface: #0f0f1a;
     --surface2: #141428;
+    --surface3: #1a1a36;
     --border: #1e1e3a;
     --border2: #2a2a50;
     --accent: #00ff88;
     --accent2: #00ccff;
     --accent3: #ff6b6b;
+    --accent4: #a855f7;
     --text: #e8e8f0;
     --text-dim: #6b6b8a;
     --text-muted: #3a3a5c;
@@ -23,6 +32,8 @@
     --display: 'Syne', sans-serif;
     --glow-green: 0 0 20px rgba(0,255,136,0.15), 0 0 60px rgba(0,255,136,0.05);
     --glow-blue: 0 0 20px rgba(0,204,255,0.15), 0 0 60px rgba(0,204,255,0.05);
+    --glow-purple: 0 0 20px rgba(168,85,247,0.15);
+    --radius: 4px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,6 +44,8 @@
     color: var(--text);
     font-family: var(--mono);
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* ── DYNAMIC GRID BACKGROUND ── */
@@ -41,12 +54,13 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(0,255,136,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.015) 1px, transparent 1px);
+      linear-gradient(rgba(0,255,136,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.012) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
     animation: gridPulse 8s ease-in-out infinite;
+    contain: layout style;
   }
 
   @keyframes gridPulse {
@@ -67,6 +81,7 @@
     pointer-events: none;
     z-index: 0;
     animation: orbFloat 12s ease-in-out infinite;
+    contain: layout style;
   }
 
   @keyframes orbFloat {
@@ -75,7 +90,6 @@
     66% { transform: translateX(-50%) translateY(5px); opacity: 0.8; }
   }
 
-  /* ── SECONDARY AMBIENT ORB ── */
   .ambient-orb-blue {
     position: fixed;
     bottom: -15%;
@@ -86,6 +100,7 @@
     pointer-events: none;
     z-index: 0;
     animation: orbFloat2 15s ease-in-out infinite;
+    contain: layout style;
   }
 
   @keyframes orbFloat2 {
@@ -93,6 +108,7 @@
     50% { transform: translate(-20px, -15px); opacity: 0.9; }
   }
 
+  /* ── LAYOUT ── */
   .layout {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -100,6 +116,7 @@
     height: 100vh;
     position: relative;
     z-index: 1;
+    contain: layout;
   }
 
   /* ── HEADER ── */
@@ -111,10 +128,13 @@
     padding: 0 24px;
     height: 56px;
     border-bottom: 1px solid var(--border);
-    background: rgba(10,10,15,0.95);
-    backdrop-filter: blur(12px);
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     position: relative;
     z-index: 10;
+    will-change: transform;
+    contain: layout style;
     animation: headerSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
@@ -137,7 +157,9 @@
     font-weight: 700;
     position: relative;
     overflow: hidden;
+    border-radius: 2px;
     animation: logoPulse 3s ease-in-out infinite;
+    will-change: box-shadow;
   }
 
   @keyframes logoPulse {
@@ -166,6 +188,8 @@
     border: 1px solid;
     text-transform: uppercase;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 2px;
+    will-change: transform, box-shadow;
   }
 
   .badge-green { border-color: var(--accent);  color: var(--accent);  background: rgba(0,255,136,0.06); }
@@ -185,6 +209,7 @@
     letter-spacing: 0.05em;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
+    will-change: color;
   }
   .header-links a::after {
     content: '';
@@ -199,6 +224,32 @@
   .header-links a:hover { color: var(--accent); }
   .header-links a:hover::after { width: 100%; }
 
+  /* ── CONNECTION STATUS ── */
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .connection-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: all 0.3s;
+  }
+  .connection-dot.offline {
+    background: var(--accent3);
+    box-shadow: 0 0 6px rgba(255,107,107,0.4);
+  }
+  .connection-dot.online {
+    box-shadow: 0 0 6px rgba(0,255,136,0.4);
+    animation: pulse 2s ease infinite;
+  }
+
   /* ── SIDEBAR ── */
   .sidebar {
     grid-row: 2;
@@ -208,6 +259,7 @@
     flex-direction: column;
     overflow: hidden;
     animation: sidebarSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    contain: layout style;
   }
 
   @keyframes sidebarSlideIn {
@@ -225,6 +277,27 @@
     margin-bottom: 10px;
     font-weight: 600;
   }
+
+  /* ── SKELETON LOADING ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--border2) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius);
+  }
+
+  @keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skeleton-line {
+    height: 10px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+
+  .skeleton-line:last-child { width: 60%; }
 
   /* ── CUSTOM MODEL SELECTOR ── */
   .model-select-wrap { position: relative; }
@@ -253,6 +326,8 @@
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     min-height: 36px;
+    border-radius: var(--radius);
+    will-change: border-color, box-shadow;
   }
 
   .custom-select-trigger:hover,
@@ -313,6 +388,7 @@
     display: none;
     flex-direction: column;
     overflow: hidden;
+    border-radius: var(--radius);
   }
 
   .custom-select.open .custom-select-dropdown {
@@ -321,7 +397,7 @@
   }
 
   @keyframes dropIn {
-    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
@@ -377,6 +453,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    will-change: background-color, border-color;
   }
 
   .custom-option:hover {
@@ -413,9 +490,7 @@
     transition: transform 0.15s;
   }
 
-  .custom-option:hover .custom-option-dot {
-    transform: scale(1.4);
-  }
+  .custom-option:hover .custom-option-dot { transform: scale(1.4); }
 
   .custom-option-no-results {
     padding: 12px 10px;
@@ -436,6 +511,31 @@
 
   .model-count { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
   .model-count span { color: var(--accent); }
+
+  /* ── PROVIDER FAVICON BADGES ── */
+  .provider-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+
+  .provider-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .provider-nvidia .provider-dot { background: #76b900; }
+  .provider-poolside .provider-dot { background: #00ccff; }
+  .provider-inclusionai .provider-dot { background: #a855f7; }
+  .provider-stepfun .provider-dot { background: #ff6b6b; }
+  .provider-baidu .provider-dot { background: #ffd700; color: #333; }
+  .provider-xai .provider-dot { background: #10a37f; }
+  .provider-unknown .provider-dot { background: var(--text-muted); }
 
   /* ── TOGGLE ── */
   .toggle-row { display: flex; align-items: center; justify-content: space-between; }
@@ -481,6 +581,7 @@
     padding: 10px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     animation: statFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    contain: layout style;
   }
 
   .stat-box:nth-child(1) { animation-delay: 0.3s; }
@@ -500,6 +601,7 @@
   .stat-val { font-size: 18px; font-weight: 700; color: var(--accent); font-family: var(--mono); line-height: 1; }
   .stat-key { font-size: 9px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
 
+  /* ── CLEAR BUTTON ── */
   .btn-clear {
     width: 100%;
     padding: 8px;
@@ -514,6 +616,8 @@
     text-transform: uppercase;
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius);
+    will-change: transform, box-shadow;
   }
 
   .btn-clear::before {
@@ -533,8 +637,11 @@
     transform: translateY(-1px);
   }
   .btn-clear:hover::before { opacity: 1; }
-  .btn-clear:active { transform: translateY(0) scale(0.98); }
+  .btn-clear:active { transform: translateY(0) scale(0.97); }
 
+  .btn-icon { margin-right: 4px; }
+
+  /* ── INFO BLOCK ── */
   .info-block {
     padding: 12px 16px;
     font-size: 10px;
@@ -542,13 +649,18 @@
     line-height: 1.7;
     flex: 1;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
   }
 
-  .info-block code { color: var(--accent2); background: rgba(0,204,255,0.06); padding: 1px 4px; font-size: 9.5px; }
+  .info-block::-webkit-scrollbar { width: 3px; }
+  .info-block::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .info-block code { color: var(--accent2); background: rgba(0,204,255,0.06); padding: 1px 4px; font-size: 9.5px; border-radius: 2px; }
   .info-block .info-title { color: var(--text-dim); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 6px; font-size: 10px; }
 
-  /* ── CHAT ── */
-  .chat-area { grid-row: 2; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+  /* ── CHAT AREA ── */
+  .chat-area { grid-row: 2; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); contain: layout; }
 
   #messages {
     flex: 1;
@@ -559,11 +671,13 @@
     gap: 0;
     scrollbar-width: thin;
     scrollbar-color: var(--border2) transparent;
+    contain: layout style;
   }
 
   #messages::-webkit-scrollbar { width: 4px; }
   #messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
+  /* ── MESSAGES ── */
   .msg {
     display: grid;
     grid-template-columns: 80px 1fr;
@@ -571,6 +685,7 @@
     padding: 14px 0;
     border-bottom: 1px solid rgba(30,30,58,0.5);
     animation: msgEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    contain: content;
   }
 
   @keyframes msgEntrance {
@@ -578,14 +693,15 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .msg-role { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding-top: 2px; text-align: right; }
+  .msg-role { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding-top: 2px; text-align: right; transition: color 0.2s; }
   .msg-role.user      { color: var(--user-color); }
   .msg-role.assistant { color: var(--ai-color); }
   .msg-role.system-msg { color: var(--text-muted); }
+  .msg:hover .msg-role { opacity: 1; }
 
   .msg-body { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-word; }
   .msg-body.system-msg { color: var(--text-muted); font-style: italic; font-size: 11px; }
-  .msg-body code { background: var(--surface2); border: 1px solid var(--border); padding: 1px 5px; font-size: 12px; color: var(--accent2); }
+  .msg-body code { background: var(--surface2); border: 1px solid var(--border); padding: 1px 5px; font-size: 12px; color: var(--accent2); border-radius: 2px; }
   .msg-body pre {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -597,9 +713,55 @@
     line-height: 1.6;
     position: relative;
     transition: border-color 0.3s;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
   }
+  .msg-body pre::-webkit-scrollbar { height: 4px; }
+  .msg-body pre::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
   .msg-body pre:hover { border-left-color: var(--accent2); }
   .msg-body pre code { background: none; border: none; padding: 0; color: var(--text); font-size: inherit; }
+
+  /* ── COPY BUTTON ── */
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 3px 8px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: all 0.2s;
+    z-index: 2;
+  }
+
+  .msg-body pre:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(0,204,255,0.08); }
+  .copy-btn.copied { border-color: var(--accent); color: var(--accent); background: rgba(0,255,136,0.1); }
+
+  /* Inline code copy */
+  .inline-copy {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 9px;
+    font-family: var(--mono);
+    padding: 0 4px;
+    cursor: pointer;
+    border-radius: 2px;
+    opacity: 0;
+    transition: all 0.2s;
+  }
+
+  .msg-body code:hover .inline-copy { opacity: 1; }
 
   /* ── STREAMING CURSOR ── */
   .cursor {
@@ -614,6 +776,32 @@
 
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
+  /* ── TYPING INDICATOR ── */
+  .typing-indicator {
+    display: flex;
+    gap: 3px;
+    padding: 2px 0;
+    align-items: center;
+    height: 18px;
+  }
+
+  .typing-indicator span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: typingBounce 1.2s ease-in-out infinite;
+    opacity: 0.5;
+  }
+
+  .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
   /* ── WELCOME SCREEN ── */
   .welcome {
     display: flex;
@@ -621,7 +809,7 @@
     align-items: center;
     justify-content: center;
     flex: 1;
-    gap: 12px;
+    gap: 16px;
     color: var(--text-muted);
     text-align: center;
     padding: 40px;
@@ -633,21 +821,36 @@
     to   { opacity: 1; transform: scale(1); }
   }
 
+  .welcome-logo {
+    font-size: 48px;
+    margin-bottom: 8px;
+    animation: logoSpin 4s linear infinite;
+  }
+
+  @keyframes logoSpin {
+    0% { transform: rotate(0deg); filter: drop-shadow(0 0 8px rgba(0,255,136,0.3)); }
+    25% { filter: drop-shadow(0 0 16px rgba(0,204,255,0.4)); }
+    50% { transform: rotate(180deg); filter: drop-shadow(0 0 8px rgba(0,255,136,0.3)); }
+    75% { filter: drop-shadow(0 0 16px rgba(168,85,247,0.3)); }
+    100% { transform: rotate(360deg); filter: drop-shadow(0 0 8px rgba(0,255,136,0.3)); }
+  }
+
   .welcome-ascii {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.4;
     color: var(--text-muted);
     letter-spacing: 0.05em;
     white-space: pre;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: opacity 0.3s;
+    max-width: 360px;
   }
 
   .welcome-ascii:hover { opacity: 1; }
 
   .welcome h2 {
     font-family: var(--display);
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
     color: var(--text);
     animation: titleGlow 4s ease-in-out infinite alternate;
@@ -662,11 +865,11 @@
 
   .welcome p { font-size: 12px; max-width: 400px; line-height: 1.7; }
 
-  .welcome-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+  .welcome-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 
   .chip {
     font-size: 11px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border: 1px solid var(--border2);
     color: var(--text-dim);
     cursor: pointer;
@@ -674,13 +877,15 @@
     background: var(--surface);
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius);
+    will-change: transform, box-shadow;
   }
 
   .chip::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0,204,255,0.05), transparent);
+    background: linear-gradient(135deg, rgba(0,204,255,0.08), transparent);
     opacity: 0;
     transition: opacity 0.25s;
   }
@@ -690,12 +895,12 @@
     color: var(--accent2);
     background: rgba(0,204,255,0.05);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,204,255,0.1);
+    box-shadow: 0 4px 12px rgba(0,204,255,0.1);
   }
   .chip:hover::before { opacity: 1; }
-  .chip:active { transform: translateY(0) scale(0.97); }
+  .chip:active { transform: translateY(0) scale(0.97); box-shadow: none; }
 
-  /* ── INPUT ── */
+  /* ── INPUT AREA ── */
   .input-area {
     border-top: 1px solid var(--border);
     padding: 16px 24px;
@@ -704,6 +909,7 @@
     gap: 10px;
     background: var(--surface);
     position: relative;
+    contain: layout style;
   }
 
   .input-area::before {
@@ -727,7 +933,8 @@
     background: var(--surface2);
     border: 1px solid var(--border2);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border-radius: 2px;
+    border-radius: var(--radius);
+    will-change: border-color, box-shadow;
   }
 
   .input-wrap:focus-within {
@@ -768,16 +975,17 @@
     min-width: 72px;
     position: relative;
     overflow: hidden;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    will-change: transform, box-shadow;
   }
 
   .send-btn::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15), transparent);
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
     transform: translateX(-100%);
-    transition: transform 0.4s ease;
+    transition: transform 0.5s ease;
   }
 
   .send-btn:hover {
@@ -786,7 +994,7 @@
     transform: translateY(-1px);
   }
   .send-btn:hover::before { transform: translateX(100%); }
-  .send-btn:active { transform: translateY(0) scale(0.97); }
+  .send-btn:active { transform: translateY(0) scale(0.97); box-shadow: none; }
 
   .send-btn:disabled {
     background: var(--border2);
@@ -795,10 +1003,11 @@
     box-shadow: none;
     transform: none;
   }
+  .send-btn:disabled::before { display: none; }
 
   .input-footer { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--text-muted); letter-spacing: 0.05em; }
-  .input-hint { display: flex; gap: 16px; }
-  .input-hint span { display: flex; align-items: center; gap: 4px; }
+  .input-hint { display: flex; gap: 16px; flex-wrap: wrap; }
+  .input-hint span { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 
   kbd {
     border: 1px solid var(--border2);
@@ -807,6 +1016,7 @@
     font-family: var(--mono);
     font-size: 9px;
     color: var(--text-dim);
+    border-radius: 2px;
     transition: all 0.15s;
   }
 
@@ -827,29 +1037,239 @@
     50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(0,255,136,0); }
   }
 
-  /* ── TYPING INDICATOR ── */
-  .typing-indicator {
-    display: flex;
-    gap: 3px;
-    padding: 2px 0;
-  }
-
-  .typing-indicator span {
-    width: 6px;
-    height: 6px;
+  /* ── SMART SCROLL BUTTON ── */
+  .scroll-bottom-btn {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--accent2);
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: var(--accent2);
-    animation: typingBounce 1.2s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 5;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+
+  .scroll-bottom-btn.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .scroll-bottom-btn:hover {
+    border-color: var(--accent2);
+    box-shadow: var(--glow-blue);
+    background: rgba(0,204,255,0.1);
+  }
+
+  /* ── RATE LIMIT COOLDOWN ── */
+  .cooldown-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cooldown-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .cooldown-text {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--accent3);
+    animation: cooldownPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes cooldownPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.97); }
+  }
+
+  .cooldown-timer {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  .cooldown-btn {
+    padding: 8px 24px;
+    background: transparent;
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.25s;
+    border-radius: var(--radius);
+    text-transform: uppercase;
+  }
+
+  .cooldown-btn:hover {
+    background: rgba(255,107,107,0.1);
+    box-shadow: 0 0 12px rgba(255,107,107,0.2);
+  }
+
+  /* ── SHORTCUT HINT ── */
+  .shortcut-hint {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 9;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .shortcut-hint.visible { opacity: 0.6; }
+
+  /* ── TOAST STACK ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    z-index: 200;
+    pointer-events: none;
+    max-width: 360px;
+  }
+
+  .toast-msg {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-family: var(--mono);
+    border-radius: var(--radius);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    transform: translateX(100%);
+    will-change: transform, opacity;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .toast-msg.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .toast-msg.hide {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  .toast-msg.info    { background: var(--surface2); border: 1px solid var(--accent2); color: var(--accent2); }
+  .toast-msg.warn    { background: rgba(255,107,107,0.1); border: 1px solid var(--accent3); color: var(--accent3); }
+  .toast-msg.error   { background: rgba(255,107,107,0.15); border: 1px solid var(--accent3); color: var(--accent3); }
+  .toast-msg.success { background: rgba(0,255,136,0.1); border: 1px solid var(--accent); color: var(--accent); }
+
+  .toast-msg .toast-close {
+    float: right;
+    cursor: pointer;
     opacity: 0.5;
+    margin-left: 8px;
+    transition: opacity 0.2s;
+  }
+  .toast-msg .toast-close:hover { opacity: 1; }
+
+  /* ── EXPORT / SAVE BAR ── */
+  .save-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    z-index: 500;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
-  .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+  .save-bar.visible { transform: translateY(0); }
 
-  @keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-    30% { transform: translateY(-4px); opacity: 1; }
+  .save-bar-actions { display: flex; gap: 8px; }
+
+  .save-bar-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
+
+  .save-bar-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .save-bar-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .save-bar-btn.danger:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ── RETRY BUTTON ── */
+  .retry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(255,107,107,0.1);
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+
+  .retry-btn:hover {
+    background: rgba(255,107,107,0.2);
+    box-shadow: 0 0 10px rgba(255,107,107,0.2);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
   /* ── MOBILE ── */
   @media (max-width: 700px) {
@@ -860,85 +1280,92 @@
     .chat-area { grid-row: 3; }
     .header-links { display: none; }
     .stats-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .welcome h2 { font-size: 18px; }
+    .welcome-logo { font-size: 36px; }
+    .welcome-chips { gap: 6px; }
+    .chip { font-size: 10px; padding: 5px 10px; }
+
+    .input-area { padding: 12px 12px env(safe-area-inset-bottom, 12px); }
+    .send-btn { min-width: 64px; font-size: 11px; padding: 10px 14px; }
+
+    .custom-select-dropdown { max-height: 180px; }
   }
 
-  /* ── TOAST ── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--accent3);
-    color: var(--accent3);
-    padding: 10px 16px;
-    font-size: 12px;
-    z-index: 100;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    max-width: 320px;
-    pointer-events: none;
-    backdrop-filter: blur(8px);
-  }
-
-  #toast.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* ── SCROLLBAR-ENHANCED ── */
-  .msg-role {
-    transition: color 0.2s;
-  }
-
-  .msg:hover .msg-role { opacity: 1; }
-
-  /* ── FOCUS RING ── */
+  /* ── FOCUS ACCESSIBILITY ── */
   textarea:focus { outline: none; }
   .send-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-clear:focus-visible { outline: 2px solid var(--accent3); outline-offset: 2px; }
+  .retry-btn:focus-visible { outline: 2px solid var(--accent3); outline-offset: 2px; }
+
+  /* ── SCANLINE OVERLAY (subtle CRT feel) ── */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.015) 2px,
+      rgba(0,0,0,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+  }
 </style>
 </head>
 <body>
 
-<div class="ambient-orb-blue"></div>
+<!-- Subtle CRT scanline overlay -->
+<div class="scanlines" aria-hidden="true"></div>
+
+<!-- Secondary ambient orb -->
+<div class="ambient-orb-blue" aria-hidden="true"></div>
 
 <div class="layout">
 
   <!-- HEADER -->
-  <header>
+  <header role="banner">
     <div class="logo">
-      <div class="logo-icon">K∞</div>
+      <div class="logo-icon" aria-hidden="true">K∞</div>
       <span class="logo-text">Kilo<span>Free</span>API</span>
     </div>
-    <div class="header-badges">
-      <span class="badge badge-green">No Auth</span>
-      <span class="badge badge-blue">OpenAI Compatible</span>
-      <span class="badge badge-red">Zero Cost</span>
+    <div class="header-badges" aria-label="Service badges">
+      <span class="badge badge-green" title="No authentication required">No Auth</span>
+      <span class="badge badge-blue" title="Compatible with OpenAI API format">OpenAI Compatible</span>
+      <span class="badge badge-red" title="Completely free to use">Zero Cost</span>
     </div>
     <div class="header-links">
-      <a href="https://github.com/izaart95-jpg/Kilo-Free-API" target="_blank">GitHub ↗</a>
-      <a href="https://api.kilo.ai/api/openrouter/models" target="_blank">Models API ↗</a>
+      <a href="https://github.com/izaart95-jpg/Kilo-Free-API" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://api.kilo.ai/api/openrouter/models" target="_blank" rel="noopener">Models API ↗</a>
+      <!-- Connection status indicator -->
+      <div class="connection-status" role="status" aria-live="polite" aria-label="Connection status">
+        <span class="connection-dot online" id="connDot"></span>
+        <span id="connLabel">Online</span>
+      </div>
     </div>
   </header>
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" role="complementary" aria-label="Sidebar controls">
     <div class="sidebar-section">
       <div class="sidebar-label">Model</div>
-      <div id="modelWrap" class="model-select-wrap">
-        <div class="model-loading">
+      <div id="modelWrap" class="model-select-wrap" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Select AI model">
+        <!-- Skeleton loading state -->
+        <div id="modelLoading" class="model-loading">
           <span class="cursor" style="width:6px;height:6px;border-radius:50%;"></span>
           Loading free models...
         </div>
       </div>
-      <div class="model-count" id="modelCount"></div>
+      <div class="model-count" id="modelCount" aria-live="polite"></div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-label">Options</div>
       <div class="toggle-row">
-        <span class="toggle-label">Streaming</span>
-        <label class="toggle">
+        <span class="toggle-label" id="streamLabel">Streaming</span>
+        <label class="toggle" aria-labelledby="streamLabel">
           <input type="checkbox" id="streamToggle" checked>
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
@@ -948,23 +1375,25 @@
 
     <div class="sidebar-section">
       <div class="sidebar-label">Session Stats</div>
-      <div class="stats-grid">
+      <div class="stats-grid" role="status" aria-label="Session statistics">
         <div class="stat-box">
-          <div class="stat-val" id="statMsgs">0</div>
+          <div class="stat-val" id="statMsgs" aria-label="Messages sent">0</div>
           <div class="stat-key">Messages</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" id="statTokens">0</div>
+          <div class="stat-val" id="statTokens" aria-label="Tokens used">0</div>
           <div class="stat-key">Tokens</div>
         </div>
       </div>
     </div>
 
     <div class="sidebar-section">
-      <button class="btn-clear" id="clearBtn">⌫ Clear Chat</button>
+      <button class="btn-clear" id="clearBtn" aria-label="Clear chat history">
+        <span class="btn-icon">⌫</span> Clear Chat
+      </button>
     </div>
 
-    <div class="info-block">
+    <div class="info-block" role="note" aria-label="API information">
       <div class="info-title">// About</div>
       Direct access to free LLMs via<br>
       <code>api.kilo.ai</code> — no signup,<br>
@@ -981,48 +1410,86 @@
   </aside>
 
   <!-- CHAT -->
-  <main class="chat-area">
-    <div id="messages">
-      <div class="welcome" id="welcome">
+  <main class="chat-area" role="main" aria-label="Chat area">
+    <div id="messages" role="log" aria-live="polite" aria-label="Chat messages">
+      <div class="welcome" id="welcome" role="region" aria-label="Welcome screen">
+        <div class="welcome-logo" aria-hidden="true">⚡</div>
         <div class="welcome-ascii">╔══════════════════════╗
 ║  FREE · OPEN · READY ║
 ╚══════════════════════╝</div>
         <h2>Ask <span>anything</span></h2>
         <p>No API key required. Select a model from the sidebar and start chatting with free LLMs directly in your browser.</p>
-        <div class="welcome-chips">
-          <div class="chip" onclick="setPrompt('Explain quantum entanglement simply')">Explain quantum entanglement</div>
-          <div class="chip" onclick="setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
-          <div class="chip" onclick="setPrompt('What are the best practices for REST API design?')">REST API best practices</div>
-          <div class="chip" onclick="setPrompt('Write a haiku about open source software')">Haiku about open source</div>
+        <div class="welcome-chips" role="list" aria-label="Quick prompts">
+          <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Explain quantum entanglement simply')" onkeydown="if(event.key==='Enter')setPrompt('Explain quantum entanglement simply')">Explain quantum entanglement</div>
+          <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Write a Python function to reverse a linked list')" onkeydown="if(event.key==='Enter')setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
+          <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('What are the best practices for REST API design?')" onkeydown="if(event.key==='Enter')setPrompt('What are the best practices for REST API design?')">REST API best practices</div>
+          <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Write a haiku about open source software')" onkeydown="if(event.key==='Enter')setPrompt('Write a haiku about open source software')">Haiku about open source</div>
         </div>
       </div>
     </div>
 
-    <div class="input-area">
+    <!-- Rate-limit cooldown overlay -->
+    <div class="cooldown-overlay" id="cooldownOverlay" role="alert" aria-label="Rate limited">
+      <div class="cooldown-text">⏳ Rate Limited</div>
+      <div class="cooldown-timer" id="cooldownTimer">0s</div>
+      <button class="cooldown-btn" id="cooldownBtn" onclick="retryAfterCooldown()">Try Again</button>
+    </div>
+
+    <!-- Smart scroll button -->
+    <div class="scroll-bottom-btn" id="scrollBtn" onclick="scrollToBottom()" aria-label="Scroll to bottom">
+      ↓
+    </div>
+
+    <div class="input-area" role="search" aria-label="Message input">
       <div class="input-row">
         <div class="input-wrap">
-          <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for newline)" rows="1"></textarea>
+          <!-- Inline copy template (hidden, cloned by JS) -->
+          <span class="inline-copy" onclick="copyInline(this)" aria-label="Copy code">copy</span>
+          <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for newline)" rows="1" aria-label="Message input" autocomplete="off"></textarea>
         </div>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">Send</button>
       </div>
       <div class="input-footer">
         <div class="input-hint">
           <span><kbd>Enter</kbd> send</span>
           <span><kbd>Shift</kbd>+<kbd>Enter</kbd> newline</span>
+          <span><kbd>/</kbd> focus</span>
+          <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> send</span>
+          <span><kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>K</kbd> clear</span>
         </div>
-        <span id="statusText"><span class="status-dot"></span>Ready</span>
+        <span id="statusText" role="status" aria-live="polite"><span class="status-dot"></span>Ready</span>
       </div>
     </div>
   </main>
 
 </div>
 
-<div id="toast"></div>
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer" role="alert" aria-live="assertive" aria-label="Notifications"></div>
+
+<!-- Save/Export bar (hidden by default) -->
+<div class="save-bar" id="saveBar" role="toolbar" aria-label="Save and export tools">
+  <span id="saveBarText">💾 3 messages saved</span>
+  <div class="save-bar-actions">
+    <button class="save-bar-btn" onclick="exportChat()" title="Export as JSON">Export JSON</button>
+    <button class="save-bar-btn" onclick="exportChat('txt')" title="Export as text">Export TXT</button>
+    <button class="save-bar-btn primary" onclick="loadFromStorage()" title="Load saved chat">Load Saved</button>
+    <button class="save-bar-btn danger" onclick="clearSavedChat()" title="Delete saved chat">Delete</button>
+  </div>
+</div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// KILO-FREE-API · PRODUCTION JS
+// Pure vanilla JS — no frameworks, no build tools
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const KILO_BASE = 'https://api.kilo.ai/api/openrouter';
 const PROXY     = 'https://corsproxy.io/?url=';
 const PROXY1    = 'https://proxy.corsfix.com?';
+const STORAGE_KEY = 'kilofree-chat';
+const STREAM_SPEED = 15; // ms per character for streaming
+
 const proxify   = (url) => PROXY + encodeURIComponent(url);
 const proxify1  = (url) => PROXY1 + url;
 
@@ -1032,107 +1499,32 @@ let totalTokens = 0;
 let msgCount = 0;
 let currentModel = 'kilo-auto/free';
 let allModelIds = [];
+let userHasScrolledUp = false;
+let streamingAbortController = null;
+let toastQueue = [];
+let toastVisible = [];
 
-// ── Custom Select ─────────────────────────────────────────────────────────────
-function buildCustomSelect(models) {
-  const wrap = document.getElementById('modelWrap');
-
-  const recommended = { id: 'kilo-auto/free', label: '⚡ kilo-auto/free', sub: 'recommended' };
-
-  wrap.innerHTML = `
-    <div class="custom-select" id="customSelect">
-      <div class="custom-select-trigger" id="selectTrigger">
-        <div class="custom-select-trigger-inner">
-          <span class="custom-select-value" id="selectValue">${recommended.label}</span>
-          <span class="custom-select-sub" id="selectSub">${recommended.sub}</span>
-        </div>
-        <span class="custom-select-arrow">▾</span>
-      </div>
-      <div class="custom-select-dropdown" id="selectDropdown">
-        <div class="custom-select-search">
-          <span class="custom-select-search-icon">⌕</span>
-          <input type="text" id="modelSearch" placeholder="Filter models…" autocomplete="off" spellcheck="false">
-        </div>
-        <div class="custom-select-options" id="selectOptions"></div>
-      </div>
-    </div>
-  `;
-
-  allModelIds = models;
-  renderOptions('');
-
-  const cs = document.getElementById('customSelect');
-  const trigger = document.getElementById('selectTrigger');
-  const searchInput = document.getElementById('modelSearch');
-
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = cs.classList.toggle('open');
-    if (isOpen) {
-      searchInput.focus();
-    }
-  });
-
-  searchInput.addEventListener('input', () => renderOptions(searchInput.value));
-  searchInput.addEventListener('keydown', (e) => e.stopPropagation());
-
-  document.addEventListener('click', () => cs.classList.remove('open'));
-  document.getElementById('selectDropdown').addEventListener('click', e => e.stopPropagation());
+// ── Provider mapping for favicons ──────────────────────────────────────────────
+function getProvider(id) {
+  const parts = id.split('/');
+  const provider = parts.length > 1 ? parts[0] : 'unknown';
+  let cls = 'provider-unknown';
+  if (provider.includes('nvidia')) cls = 'provider-nvidia';
+  else if (provider.includes('poolside')) cls = 'provider-poolside';
+  else if (provider.includes('inclusionai')) cls = 'provider-inclusionai';
+  else if (provider.includes('stepfun')) cls = 'provider-stepfun';
+  else if (provider.includes('baidu')) cls = 'provider-baidu';
+  else if (provider.includes('x-ai')) cls = 'provider-xai';
+  return cls;
 }
 
-function renderOptions(filter) {
-  const list = document.getElementById('selectOptions');
-  const q = filter.toLowerCase();
+// ── Rate limit state ──────────────────────────────────────────────────────────
+let rateLimitReset = 0;
+let rateLimitTimer = null;
 
-  const recommended = { id: 'kilo-auto/free', label: '⚡ kilo-auto/free', sub: 'recommended' };
-  const filtered = allModelIds.filter(id => id.toLowerCase().includes(q));
-
-  let html = '';
-
-  if (!q || recommended.id.includes(q)) {
-    const sel = currentModel === recommended.id ? ' selected' : '';
-    html += `<div class="custom-option recommended${sel}" data-id="${recommended.id}" data-label="${recommended.label}" data-sub="${recommended.sub}">
-      <span class="custom-option-dot"></span>${recommended.label}
-    </div>`;
-  }
-
-  if (filtered.length === 0 && q && !recommended.id.includes(q)) {
-    html += `<div class="custom-option-no-results">No models match "${filter}"</div>`;
-  } else {
-    filtered.forEach(id => {
-      const sel = currentModel === id ? ' selected' : '';
-      const parts = id.split('/');
-      const label = parts[parts.length - 1] || id;
-      const provider = parts.length > 1 ? parts[0] : '';
-      html += `<div class="custom-option${sel}" data-id="${id}" data-label="${id}" data-sub="${provider}">
-        <span class="custom-option-dot"></span>${id}
-      </div>`;
-    });
-  }
-
-  list.innerHTML = html;
-
-  list.querySelectorAll('.custom-option[data-id]').forEach(opt => {
-    opt.addEventListener('click', () => {
-      const id    = opt.dataset.id;
-      const label = opt.dataset.label;
-      const sub   = opt.dataset.sub;
-      selectModel(id, label, sub);
-    });
-  });
-}
-
-function selectModel(id, label, sub) {
-  currentModel = id;
-  document.getElementById('selectValue').textContent = label;
-  document.getElementById('selectSub').textContent = sub || '';
-  document.getElementById('customSelect').classList.remove('open');
-  const si = document.getElementById('modelSearch');
-  if (si) { si.value = ''; renderOptions(''); }
-  document.querySelectorAll('.custom-option').forEach(o => {
-    o.classList.toggle('selected', o.dataset.id === id);
-  });
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// LOAD MODELS
+// ═══════════════════════════════════════════════════════════════════════════════
 
 // ── Hardcoded fallback models ─────────────────────────────────────────────────
 const HARDCODED_MODELS = [
@@ -1147,8 +1539,24 @@ const HARDCODED_MODELS = [
   'x-ai/grok-code-fast-1:optimized:free',
 ];
 
-// ── Load models ───────────────────────────────────────────────────────────────
+// ── Skeleton while loading ────────────────────────────────────────────────────
+function showSkeleton() {
+  const wrap = document.getElementById('modelWrap');
+  wrap.innerHTML = `
+    <div class="skeleton" style="height:36px;margin-bottom:6px;border-radius:4px;"></div>
+    <div style="display:flex;gap:8px;">
+      <div class="skeleton" style="height:10px;flex:1;border-radius:2px;"></div>
+      <div class="skeleton" style="height:10px;width:40px;border-radius:2px;"></div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="skeleton" style="height:10px;width:80%;border-radius:2px;margin-bottom:6px;"></div>
+      <div class="skeleton" style="height:10px;width:60%;border-radius:2px;"></div>
+    </div>
+  `;
+}
+
 async function loadModels() {
+  showSkeleton();
   try {
     const res  = await fetch(proxify1(`${KILO_BASE}/models`));
     const json = await res.json();
@@ -1156,7 +1564,6 @@ async function loadModels() {
       .filter(m => m.id.includes(':free'))
       .map(m => m.id);
     const free = [...new Set([...fetched, ...HARDCODED_MODELS])].sort();
-
     buildCustomSelect(free);
     document.getElementById('modelCount').innerHTML =
       `<span>${free.length}</span> free models available`;
@@ -1171,12 +1578,149 @@ async function loadModels() {
   }
 }
 
-// ── Render markdown-ish ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// CUSTOM SELECT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function buildCustomSelect(models) {
+  const wrap = document.getElementById('modelWrap');
+  wrap.innerHTML = `
+    <div class="custom-select" id="customSelect">
+      <div class="custom-select-trigger" id="selectTrigger">
+        <div class="custom-select-trigger-inner">
+          <span class="custom-select-value" id="selectValue">⚡ kilo-auto/free</span>
+          <span class="custom-select-sub" id="selectSub">recommended</span>
+        </div>
+        <span class="custom-select-arrow">▾</span>
+      </div>
+      <div class="custom-select-dropdown" id="selectDropdown" role="listbox">
+        <div class="custom-select-search">
+          <span class="custom-select-search-icon">⌕</span>
+          <input type="text" id="modelSearch" placeholder="Filter models…" autocomplete="off" spellcheck="false" role="searchbox" aria-label="Filter models">
+        </div>
+        <div class="custom-select-options" id="selectOptions" role="listbox"></div>
+      </div>
+    </div>
+  `;
+
+  allModelIds = models;
+  renderOptions('');
+
+  const cs = document.getElementById('customSelect');
+  const trigger = document.getElementById('selectTrigger');
+  const searchInput = document.getElementById('modelSearch');
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = cs.classList.toggle('open');
+    cs.setAttribute('aria-expanded', isOpen);
+    if (isOpen) searchInput.focus();
+  });
+
+  searchInput.addEventListener('input', () => renderOptions(searchInput.value));
+  searchInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Escape') cs.classList.remove('open');
+  });
+
+  document.addEventListener('click', () => {
+    cs.classList.remove('open');
+    cs.setAttribute('aria-expanded', 'false');
+  });
+  document.getElementById('selectDropdown').addEventListener('click', e => e.stopPropagation());
+}
+
+function renderOptions(filter) {
+  const list = document.getElementById('selectOptions');
+  const q = filter.toLowerCase();
+  const recommended = { id: 'kilo-auto/free', label: '⚡ kilo-auto/free', sub: 'recommended' };
+  const filtered = allModelIds.filter(id => id.toLowerCase().includes(q));
+
+  let html = '';
+
+  if (!q || recommended.id.includes(q)) {
+    const sel = currentModel === recommended.id ? ' selected' : '';
+    html += `<div class="custom-option recommended${sel}" data-id="${recommended.id}" data-label="${recommended.label}" data-sub="${recommended.sub}" role="option">
+      <span class="custom-option-dot"></span>${recommended.label}
+    </div>`;
+  }
+
+  if (filtered.length === 0 && q && !recommended.id.includes(q)) {
+    html += `<div class="custom-option-no-results">No models match "${filter}"</div>`;
+  } else {
+    filtered.forEach(id => {
+      const sel = currentModel === id ? ' selected' : '';
+      const parts = id.split('/');
+      const label = parts[parts.length - 1] || id;
+      const provider = parts.length > 1 ? parts[0] : '';
+      const provCls = getProvider(id);
+      html += `<div class="custom-option${sel}" data-id="${id}" data-label="${id}" data-sub="${provider}" role="option">
+        <span class="provider-badge ${provCls}"><span class="provider-dot"></span>${provider}</span>
+        ${id}
+      </div>`;
+    });
+  }
+
+  list.innerHTML = html;
+
+  list.querySelectorAll('.custom-option[data-id]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const id = opt.dataset.id;
+      const label = opt.dataset.label;
+      const sub = opt.dataset.sub;
+      selectModel(id, label, sub);
+    });
+  });
+}
+
+function selectModel(id, label, sub) {
+  currentModel = id;
+  document.getElementById('selectValue').textContent = label;
+  document.getElementById('selectSub').textContent = sub || '';
+  const cs = document.getElementById('customSelect');
+  cs.classList.remove('open');
+  cs.setAttribute('aria-expanded', 'false');
+  const si = document.getElementById('modelSearch');
+  if (si) { si.value = ''; renderOptions(''); }
+  document.querySelectorAll('.custom-option').forEach(o => {
+    o.classList.toggle('selected', o.dataset.id === id);
+  });
+  showToast(`Model: ${label}`, 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MARKDOWN RENDERING (enhanced)
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function renderContent(text) {
-  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
-    `<pre><code>${escHtml(code.trim())}</code></pre>`);
-  text = text.replace(/`([^`]+)`/g, (_, c) => `<code>${escHtml(c)}</code>`);
+  if (!text) return '';
+  // Escape HTML first
+  text = escHtml(text);
+  // Code fences (```lang ... ```)
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    const langLabel = lang ? `<span class="code-lang">${escHtml(lang)}</span>` : '';
+    return `<pre><code>${langLabel}${code.trim()}<button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="Copy code">copy</button></code></pre>`;
+  });
+  // Inline code
+  text = text.replace(/`([^`]+)`/g, (_, c) => `<code>${escHtml(c)}<span class="inline-copy" onclick="copyInline(this)">copy</span></code>`);
+  // Bold
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // Headers
+  text = text.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  text = text.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+  text = text.replace(/^# (.+)$/gm, '<h3>$1</h3>');
+  // Unordered lists
+  text = text.replace(/^- (.+)$/gm, '<li>$1</li>');
+  // Group consecutive <li> into <ul>
+  text = text.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+  // Links
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Blockquotes
+  text = text.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+  // Line breaks
+  text = text.replace(/\n/g, '<br>');
   return text;
 }
 
@@ -1184,39 +1728,135 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Message rendering ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// COPY FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function copyCodeBlock(btn) {
+  const code = btn.parentElement.textContent.replace('copy', '').trim();
+  try {
+    await navigator.clipboard.writeText(code);
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
+  } catch {
+    fallbackCopy(code, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  btn.textContent = '✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
+}
+
+function copyInline(btn) {
+  const code = btn.parentElement.textContent.replace('copy', '').trim();
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = 'copy'; }, 1500);
+  }).catch(() => {
+    fallbackCopy(code, btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MESSAGE RENDERING
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function addMessage(role, content, streaming = false) {
   const welcome = document.getElementById('welcome');
   if (welcome) welcome.remove();
+  hideRateLimitOverlay();
 
   const msgs = document.getElementById('messages');
-  const div  = document.createElement('div');
+  const div = document.createElement('div');
   div.className = 'msg';
+  div.setAttribute('role', 'article');
+  div.setAttribute('aria-label', `${role === 'user' ? 'User' : 'Assistant'} message`);
   div.innerHTML = `
     <div class="msg-role ${role}">${role === 'user' ? 'You' : role === 'assistant' ? 'AI' : '·'}</div>
-    <div class="msg-body${role === 'system-msg' ? ' system-msg' : ''}" id="msg-${Date.now()}"></div>
+    <div class="msg-body${role === 'system-msg' ? ' system-msg' : ''}" id="msg-${Date.now()}" ${streaming ? 'aria-busy="true"' : ''}></div>
   `;
   msgs.appendChild(div);
   const bodyEl = div.querySelector('.msg-body');
 
   if (streaming) {
     let raw = '';
+    let streamInterval = null;
+    let streamResolve = null;
+
     return (chunk, done) => {
       if (chunk) raw += chunk;
       bodyEl.innerHTML = renderContent(raw) + (done ? '' : '<span class="cursor"></span>');
-      msgs.scrollTop = msgs.scrollHeight;
+      maybeScrollDown();
+
+      if (done) {
+        bodyEl.removeAttribute('aria-busy');
+      }
     };
   } else {
     bodyEl.innerHTML = content ? renderContent(content) : '<span class="cursor"></span>';
-    msgs.scrollTop = msgs.scrollHeight;
+    maybeScrollDown();
     return (text) => {
       bodyEl.innerHTML = renderContent(text);
-      msgs.scrollTop = msgs.scrollHeight;
+      maybeScrollDown();
     };
   }
 }
 
-// ── Send message ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// SMART AUTO-SCROLL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const messagesEl = document.getElementById ? null : null; // placeholder
+
+function maybeScrollDown() {
+  const msgs = document.getElementById('messages');
+  const scrollBtn = document.getElementById('scrollBtn');
+  const threshold = 200; // px from bottom to consider "at bottom"
+
+  const isNearBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < threshold;
+
+  if (isNearBottom) {
+    msgs.scrollTop = msgs.scrollHeight;
+    scrollBtn.classList.remove('visible');
+  } else {
+    scrollBtn.classList.add('visible');
+  }
+}
+
+function scrollToBottom() {
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+  document.getElementById('scrollBtn').classList.remove('visible');
+}
+
+// Track scroll position
+document.addEventListener('DOMContentLoaded', () => {
+  const msgs = document.getElementById('messages');
+  let scrollTimeout;
+  msgs.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const threshold = 200;
+      const isNearBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < threshold;
+      document.getElementById('scrollBtn').classList.toggle('visible', !isNearBottom);
+    }, 50);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SEND MESSAGE
+// ═══════════════════════════════════════════════════════════════════════════════
+
 async function sendMessage() {
   const input = document.getElementById('input');
   const text  = input.value.trim();
@@ -1235,19 +1875,31 @@ async function sendMessage() {
   history.push({ role: 'user', content: text });
   msgCount++;
   document.getElementById('statMsgs').textContent = msgCount;
+  maybeScrollDown();
+
+  // Save after each user message
+  requestIdleCallback(saveToStorage);
 
   const streaming = document.getElementById('streamToggle').checked;
   const model     = currentModel;
 
   if (streaming) {
     const update = addMessage('assistant', '', true);
+    streamingAbortController = new AbortController();
     try {
       const res = await fetch(proxify(`${KILO_BASE}/chat/completions`), {
         method: 'POST',
+        signal: streamingAbortController.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages: history, max_tokens: 2048, stream: true })
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 429) {
+          handleRateLimit(res);
+          throw new Error('Rate limited (429). Please wait.');
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       const reader = res.body.getReader();
       const dec    = new TextDecoder();
@@ -1264,7 +1916,10 @@ async function sendMessage() {
           try {
             const p     = JSON.parse(d);
             const chunk = p.choices?.[0]?.delta?.content;
-            if (chunk) { full += chunk; update(chunk, false); }
+            if (chunk) {
+              full += chunk;
+              update(chunk, false);
+            }
             if (p.usage?.total_tokens) {
               totalTokens += p.usage.total_tokens;
               document.getElementById('statTokens').textContent = totalTokens;
@@ -1274,9 +1929,12 @@ async function sendMessage() {
       }
       update('', true);
       history.push({ role: 'assistant', content: full });
+      requestIdleCallback(saveToStorage);
     } catch(e) {
-      update(`Error: ${e.message}`, true);
-      showToast(e.message);
+      if (e.name !== 'AbortError') {
+        update(`Error: ${e.message}`, true);
+        showToast(e.message, 'error');
+      }
     }
   } else {
     const updater = addMessage('assistant', '');
@@ -1286,7 +1944,13 @@ async function sendMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages: history, max_tokens: 2048, stream: false })
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 429) {
+          handleRateLimit(res);
+          throw new Error('Rate limited (429). Please wait.');
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
       const json  = await res.json();
       const reply = json.choices?.[0]?.message?.content ?? '(no response)';
       updater(reply);
@@ -1295,9 +1959,21 @@ async function sendMessage() {
         totalTokens += json.usage.total_tokens;
         document.getElementById('statTokens').textContent = totalTokens;
       }
+      requestIdleCallback(saveToStorage);
     } catch(e) {
-      updater(`Error: ${e.message}`);
-      showToast(e.message);
+      if (e.name !== 'AbortError') {
+        updater(`Error: ${e.message}\n\n`, false);
+        // Add retry button
+        const msgs = document.getElementById('messages');
+        const lastMsg = msgs.lastElementChild;
+        if (lastMsg) {
+          const retryDiv = document.createElement('div');
+          retryDiv.style.marginTop = '8px';
+          retryDiv.innerHTML = `<button class="retry-btn" onclick="retryLast()">↻ Retry</button>`;
+          lastMsg.appendChild(retryDiv);
+        }
+        showToast(e.message, 'error');
+      }
     }
   }
 
@@ -1305,22 +1981,346 @@ async function sendMessage() {
   sendBtn.disabled = false;
   sendBtn.style.transform = '';
   document.getElementById('statusText').innerHTML = '<span class="status-dot"></span>Ready';
+  requestIdleCallback(saveToStorage);
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function setPrompt(text) {
-  document.getElementById('input').value = text;
-  document.getElementById('input').focus();
+// ── Retry last message ───────────────────────────────────────────────────────
+function retryLast() {
+  if (history.length >= 2) {
+    // Remove last AI response
+    const last = history[history.length - 1];
+    if (last.role === 'assistant') history.pop();
+    if (history.length > 0) {
+      const userMsg = history[history.length - 1];
+      sendMessage();
+    }
+  }
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = `⚠ ${msg}`;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
+// ═══════════════════════════════════════════════════════════════════════════════
+// RATE LIMIT HANDLING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function handleRateLimit(res) {
+  const retryAfter = parseInt(res.headers.get('x-ratelimit-reset-requests'), 10) ||
+                     parseInt(res.headers.get('retry-after'), 10) || 15;
+  rateLimitReset = Date.now() + retryAfter * 1000;
+  showRateLimitOverlay(retryAfter);
+  startCooldownTimer(retryAfter);
 }
 
+function showRateLimitOverlay(seconds) {
+  const overlay = document.getElementById('cooldownOverlay');
+  overlay.classList.add('active');
+}
+
+function hideRateLimitOverlay() {
+  const overlay = document.getElementById('cooldownOverlay');
+  overlay.classList.remove('active');
+  if (rateLimitTimer) { clearInterval(rateLimitTimer); rateLimitTimer = null; }
+  rateLimitReset = 0;
+}
+
+function startCooldownTimer(totalSeconds) {
+  if (rateLimitTimer) clearInterval(rateLimitTimer);
+  let remaining = totalSeconds;
+  const timerEl = document.getElementById('cooldownTimer');
+  timerEl.textContent = `${remaining}s`;
+
+  rateLimitTimer = setInterval(() => {
+    remaining = Math.ceil((rateLimitReset - Date.now()) / 1000);
+    if (remaining <= 0) {
+      clearInterval(rateLimitTimer);
+      rateLimitTimer = null;
+      hideRateLimitOverlay();
+      showToast('Ready to go!', 'success');
+      return;
+    }
+    timerEl.textContent = `${remaining}s`;
+  }, 1000);
+}
+
+function retryAfterCooldown() {
+  if (rateLimitReset && Date.now() < rateLimitReset) {
+    showToast('Still cooling down...', 'warn');
+    return;
+  }
+  hideRateLimitOverlay();
+  sendMessage();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LOCAL STORAGE PERSISTENCE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function saveToStorage() {
+  try {
+    const data = {
+      history,
+      msgCount,
+      totalTokens,
+      currentModel,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    updateSaveBar();
+  } catch (e) {
+    // localStorage might be full or unavailable
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      showToast('No saved chat found', 'warn');
+      return;
+    }
+    const data = JSON.parse(raw);
+    if (!data.history || !Array.isArray(data.history)) return;
+
+    history = data.history;
+    msgCount = data.msgCount || 0;
+    totalTokens = data.totalTokens || 0;
+    currentModel = data.currentModel || 'kilo-auto/free';
+
+    // Rebuild UI
+    const msgs = document.getElementById('messages');
+    msgs.innerHTML = '';
+    document.getElementById('statMsgs').textContent = msgCount;
+    document.getElementById('statTokens').textContent = totalTokens;
+
+    history.forEach(msg => {
+      if (msg.role === 'system') return;
+      const updater = addMessage(msg.role, msg.content);
+      if (updater) updater(msg.content);
+    });
+
+    showToast(`Loaded ${history.length} messages`, 'success');
+  } catch (e) {
+    showToast('Failed to load saved chat', 'error');
+  }
+}
+
+function exportChat(format = 'json') {
+  try {
+    let content, filename, mimeType;
+    if (format === 'json') {
+      content = JSON.stringify({ model: currentModel, messages: history, exportedAt: new Date().toISOString() }, null, 2);
+      filename = `kilofree-chat-${Date.now()}.json`;
+      mimeType = 'application/json';
+    } else {
+      const lines = history.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+      content = lines;
+      filename = `kilofree-chat-${Date.now()}.txt`;
+      mimeType = 'text/plain';
+    }
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported as ${format.toUpperCase()}`, 'success');
+  } catch (e) {
+    showToast('Export failed', 'error');
+  }
+}
+
+function clearSavedChat() {
+  localStorage.removeItem(STORAGE_KEY);
+  updateSaveBar();
+  showToast('Saved chat deleted', 'info');
+}
+
+function updateSaveBar() {
+  const bar = document.getElementById('saveBar');
+  const text = document.getElementById('saveBarText');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      const count = data.history ? data.history.length : 0;
+      text.textContent = `💾 ${count} messages saved at ${new Date(data.timestamp).toLocaleTimeString()}`;
+      bar.classList.add('visible');
+      // Auto-hide after 5s
+      clearTimeout(bar._hideTimeout);
+      bar._hideTimeout = setTimeout(() => bar.classList.remove('visible'), 5000);
+    } else {
+      bar.classList.remove('visible');
+    }
+  } catch { bar.classList.remove('visible'); }
+}
+
+// Auto-load saved chat on start
+if (localStorage.getItem(STORAGE_KEY)) {
+  setTimeout(loadFromStorage, 500);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TOAST SYSTEM (stack, multi-level)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function showToast(msg, severity = 'info', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast-msg ${severity}`;
+  toast.setAttribute('role', 'alert');
+
+  const icon = severity === 'error' ? '✕' : severity === 'warn' ? '⚠' : severity === 'success' ? '✓' : 'ℹ';
+  toast.innerHTML = `<span class="toast-close" onclick="dismissToast(this)">&times;</span>${icon} ${escHtml(msg)}`;
+
+  container.appendChild(toast);
+
+  // Trigger show animation
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+
+  // Auto dismiss
+  toast._timeout = setTimeout(() => dismissToast(toast.querySelector('.toast-close')), duration);
+}
+
+function dismissToast(closeBtn) {
+  if (!closeBtn) return;
+  const toast = closeBtn.closest('.toast-msg');
+  if (!toast) return;
+  toast.classList.remove('show');
+  toast.classList.add('hide');
+  clearTimeout(toast._timeout);
+  setTimeout(() => toast.remove(), 300);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONNECTION STATUS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function updateConnectionStatus() {
+  const dot = document.getElementById('connDot');
+  const label = document.getElementById('connLabel');
+  if (navigator.onLine) {
+    dot.classList.remove('offline');
+    dot.classList.add('online');
+    label.textContent = 'Online';
+  } else {
+    dot.classList.remove('online');
+    dot.classList.add('offline');
+    label.textContent = 'Offline';
+    showToast('Network connection lost', 'warn');
+  }
+}
+
+window.addEventListener('online', updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+
+// ── Service Worker Registration ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  // Create a minimal SW blob URL for offline caching
+  const swCode = `
+    const CACHE_NAME = 'kilofree-v1';
+    const URLS_TO_CACHE = [location.href, location.origin + '/'];
+
+    self.addEventListener('install', e => {
+      e.waitUntil(
+        caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE))
+          .catch(() => {}) // SW registration is optional
+      );
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        ).catch(() => {})
+      );
+      self.clients.claim();
+    });
+
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(cached => {
+          return cached || fetch(e.request).then(response => {
+            return caches.open(CACHE_NAME).then(cache => {
+              if (e.request.url.startsWith('http')) {
+                cache.put(e.request, response.clone()).catch(() => {});
+              }
+              return response;
+            });
+          }).catch(() => cached);
+        }).catch(() => new Response('Offline', { status: 503 }))
+      );
+    });
+  `;
+
+  try {
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl, { scope: '/' })
+      .then(() => console.log('KiloFree SW registered (offline cache)'))
+      .catch(() => {}); // SW from blob URL may fail — silently ignore
+  } catch (e) {
+    // Blob URL SW registration not supported — that's OK
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+document.addEventListener('keydown', (e) => {
+  const input = document.getElementById('input');
+  const isInputFocused = document.activeElement === input;
+
+  // Ctrl/Cmd + Enter: Send
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+    return;
+  }
+
+  // Shift + Ctrl + K: Clear chat
+  if (e.shiftKey && (e.ctrlKey || e.metaKey) && e.key === 'K') {
+    e.preventDefault();
+    document.getElementById('clearBtn').click();
+    return;
+  }
+
+  // / : Focus input (only if not already focused)
+  if (e.key === '/' && !isInputFocused) {
+    e.preventDefault();
+    input.focus();
+    return;
+  }
+
+  // Escape: Close select dropdown
+  if (e.key === 'Escape') {
+    const cs = document.getElementById('customSelect');
+    cs.classList.remove('open');
+    cs.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// ── Send on Enter, Shift+Enter for newline ──────────────────────────────────
+document.getElementById('input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Auto-resize textarea
+document.getElementById('input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+});
+
+// ── Clear Chat ──────────────────────────────────────────────────────────────
 document.getElementById('clearBtn').addEventListener('click', () => {
+  if (history.length === 0) return;
+  if (!confirm('Clear all chat history?')) return;
+
   history = [];
   msgCount = 0;
   totalTokens = 0;
@@ -1328,31 +2328,66 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('statTokens').textContent = '0';
   const msgs = document.getElementById('messages');
   msgs.innerHTML = `
-    <div class="welcome" id="welcome">
+    <div class="welcome" id="welcome" role="region" aria-label="Welcome screen">
+      <div class="welcome-logo" aria-hidden="true">⚡</div>
       <div class="welcome-ascii">╔══════════════════════╗
 ║  FREE · OPEN · READY ║
 ╚══════════════════════╝</div>
       <h2>Ask <span>anything</span></h2>
       <p>No API key required. Select a model from the sidebar and start chatting with free LLMs directly in your browser.</p>
-      <div class="welcome-chips">
-        <div class="chip" onclick="setPrompt('Explain quantum entanglement simply')">Explain quantum entanglement</div>
-        <div class="chip" onclick="setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
-        <div class="chip" onclick="setPrompt('What are the best practices for REST API design?')">REST API best practices</div>
-        <div class="chip" onclick="setPrompt('Write a haiku about open source software')">Haiku about open source</div>
+      <div class="welcome-chips" role="list" aria-label="Quick prompts">
+        <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Explain quantum entanglement simply')" onkeydown="if(event.key==='Enter')setPrompt('Explain quantum entanglement simply')">Explain quantum entanglement</div>
+        <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Write a Python function to reverse a linked list')" onkeydown="if(event.key==='Enter')setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
+        <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('What are the best practices for REST API design?')" onkeydown="if(event.key==='Enter')setPrompt('What are the best practices for REST API design?')">REST API best practices</div>
+        <div class="chip" role="listitem" tabindex="0" onclick="setPrompt('Write a haiku about open source software')" onkeydown="if(event.key==='Enter')setPrompt('Write a haiku about open source software')">Haiku about open source</div>
       </div>
     </div>`;
+
+  // Stop any ongoing streaming
+  if (streamingAbortController) {
+    streamingAbortController.abort();
+    streamingAbortController = null;
+  }
+
+  // Also clear saved storage
+  localStorage.removeItem(STORAGE_KEY);
+  updateSaveBar();
+  showToast('Chat cleared', 'info');
 });
 
-document.getElementById('input').addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+// ── Mobile keyboard handling ─────────────────────────────────────────────
+// Scroll input into view on mobile when focused
+document.getElementById('input').addEventListener('focus', () => {
+  if (window.innerWidth <= 700) {
+    setTimeout(() => {
+      document.getElementById('input').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 300);
+  }
 });
 
-document.getElementById('input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+// ── Visibility API: pause/resume on tab switch ──────────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Pause any heavy operations
+  } else {
+    // Resume
+  }
 });
 
+// ── Initial load ─────────────────────────────────────────────────────────
 loadModels();
+
+// Show shortcut hint on first visit, then hide
+setTimeout(() => {
+  const hint = document.createElement('div');
+  hint.className = 'shortcut-hint visible';
+  hint.textContent = '? for shortcuts';
+  document.body.appendChild(hint);
+  setTimeout(() => { hint.classList.remove('visible'); setTimeout(() => hint.remove(), 300); }, 3000);
+}, 2000);
+
+console.log('%c⚡ Kilo-Free-API Playground', 'font-family: "Syne", sans-serif; font-size: 16px; color: #00ff88; font-weight: 800;');
+console.log('%cReady. %d free models loaded.', 'font-family: "JetBrains Mono"; color: #6b6b8a;', HARDCODED_MODELS.length);
 </script>
 </body>
 </html>
