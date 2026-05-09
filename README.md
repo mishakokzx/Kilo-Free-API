@@ -38,8 +38,7 @@ No `Authorization` header required.
 ## List Free Models
 
 ```bash
-curl -X GET "https://api.kilo.ai/api/openrouter/models" \
-  | jq '.data[] | select(.id | contains(":free")) | .id'
+curl -X GET "https://api.kilo.ai/api/openrouter/models" | jq '.data[] | select(.id | contains(":free")) | .id'
 ```
 
 Or just use the auto-routing alias `kilo-auto/free` which picks the best available free model automatically.
