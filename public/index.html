@@ -5,34 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>KiloFree · AI Playground</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:       #080810;
-  --bg1:      #0d0d1a;
-  --bg2:      #111120;
-  --bg3:      #161628;
-  --line:     rgba(255,255,255,0.06);
-  --line2:    rgba(255,255,255,0.1);
-  --g:        #00ff88;
-  --b:        #00c8ff;
-  --r:        #ff5555;
-  --p:        #b06aff;
-  --text:     #e2e2ee;
-  --dim:      #6b6b8a;
-  --mute:     #2e2e48;
-  --mono:     'IBM Plex Mono', monospace;
-  --sans:     'Space Grotesk', sans-serif;
-  --r4:       4px;
-  --r8:       8px;
-  --r12:      12px;
-  --hdr:      52px;
-  --sb:       260px;
-  --safe-b:   env(safe-area-inset-bottom, 0px);
+  --bg:    #07070f;
+  --bg1:   #0c0c1a;
+  --bg2:   #101020;
+  --bg3:   #14142a;
+  --bg4:   #1a1a33;
+  --line:  rgba(255,255,255,0.055);
+  --line2: rgba(255,255,255,0.09);
+  --g:     #00ffaa;
+  --g2:    #00cc88;
+  --b:     #00b4ff;
+  --r:     #ff4466;
+  --p:     #aa66ff;
+  --y:     #ffcc44;
+  --text:  #ddddf0;
+  --dim:   #6666a0;
+  --mute:  #2a2a48;
+  --mono:  'JetBrains Mono', monospace;
+  --sans:  'Syne', sans-serif;
+  --r4:    4px;
+  --r8:    8px;
+  --r12:   12px;
+  --hdr:   54px;
+  --sb:    270px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 html{height:100%;overflow:hidden}
 body{
   height:100%;height:100dvh;
@@ -41,23 +43,38 @@ body{
   font-family:var(--mono);
   -webkit-font-smoothing:antialiased;
   overflow:hidden;
-  position:relative;
 }
 
-/* ── GRID TEXTURE ── */
+/* ── SCANLINE + NOISE ── */
 body::before{
   content:'';
-  position:fixed;inset:0;
+  position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
-    linear-gradient(rgba(0,255,136,.018) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,255,136,.018) 1px,transparent 1px);
-  background-size:32px 32px;
-  pointer-events:none;z-index:0;
-  animation:gp 10s ease-in-out infinite;
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.04) 2px,
+      rgba(0,0,0,.04) 4px
+    ),
+    linear-gradient(rgba(0,255,170,.012) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,170,.012) 1px,transparent 1px);
+  background-size:100% 4px, 40px 40px, 40px 40px;
 }
-@keyframes gp{0%,100%{opacity:.4}50%{opacity:.9}}
 
-/* ── APP SHELL ── */
+/* ── AMBIENT GLOW ── */
+body::after{
+  content:'';
+  position:fixed;
+  top:-30%;left:50%;transform:translateX(-50%);
+  width:700px;height:400px;
+  background:radial-gradient(ellipse at center,rgba(0,255,170,.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+  animation:ag 8s ease-in-out infinite;
+}
+@keyframes ag{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.15)}}
+
+/* ── SHELL ── */
 .shell{
   position:relative;z-index:1;
   display:grid;
@@ -65,143 +82,178 @@ body::before{
   height:100%;height:100dvh;
 }
 
-/* ── HEADER ── */
+/* ══════════════════════════════════
+   HEADER
+══════════════════════════════════ */
 .hdr{
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;
+  padding:0 18px;
   border-bottom:1px solid var(--line);
-  background:rgba(8,8,16,.94);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  background:rgba(7,7,15,.92);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
   position:relative;z-index:30;
   gap:12px;
 }
 
-.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.logo-mark{
-  width:30px;height:30px;
-  border:1.5px solid var(--g);
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:var(--g);
-  background:rgba(0,255,136,.06);
-  border-radius:var(--r4);
-  animation:lp 3s ease-in-out infinite;
-  flex-shrink:0;
+/* ── NEW LOGO ── */
+.logo{display:flex;align-items:center;gap:11px;flex-shrink:0;text-decoration:none}
+
+.logo-svg-wrap{
+  position:relative;
+  width:32px;height:32px;flex-shrink:0;
 }
-@keyframes lp{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.3)}50%{box-shadow:0 0 0 6px rgba(0,255,136,0)}}
+.logo-svg-wrap svg{
+  width:32px;height:32px;
+  overflow:visible;
+}
+/* Spinning ring behind logo */
+.logo-ring{
+  position:absolute;inset:-4px;
+  border-radius:50%;
+  border:1px solid transparent;
+  border-top-color:rgba(0,255,170,.5);
+  border-right-color:rgba(0,255,170,.2);
+  animation:lr 3s linear infinite;
+}
+@keyframes lr{to{transform:rotate(360deg)}}
 
-.logo-name{font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:.01em}
-.logo-name em{color:var(--g);font-style:normal}
+.logo-text-group{display:flex;flex-direction:column;gap:0}
+.logo-name{
+  font-family:var(--sans);
+  font-size:16px;font-weight:800;
+  letter-spacing:-.01em;
+  line-height:1;
+  color:var(--text);
+}
+.logo-name em{
+  font-style:normal;
+  background:linear-gradient(90deg,var(--g),var(--b));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.logo-tag{
+  font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);line-height:1;margin-top:2px;
+}
 
-.hdr-badges{display:flex;gap:6px;align-items:center}
+/* ── HEADER PILLS ── */
+.hdr-badges{display:flex;gap:5px;align-items:center}
 .badge{
-  font-size:9px;font-weight:600;letter-spacing:.1em;
-  padding:3px 7px;border:1px solid;text-transform:uppercase;
-  border-radius:var(--r4);
-  transition:opacity .2s;
+  font-size:8.5px;font-weight:600;letter-spacing:.09em;
+  padding:3px 8px;border:1px solid;text-transform:uppercase;
+  border-radius:100px;transition:all .2s;
 }
-.badge:hover{opacity:.8}
-.bg{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.06)}
-.bb{border-color:var(--b);color:var(--b);background:rgba(0,200,255,.06)}
-.br{border-color:var(--r);color:var(--r);background:rgba(255,85,85,.06)}
+.bg{border-color:rgba(0,255,170,.25);color:var(--g);background:rgba(0,255,170,.05)}
+.bb{border-color:rgba(0,180,255,.25);color:var(--b);background:rgba(0,180,255,.05)}
+.br{border-color:rgba(255,68,102,.25);color:var(--r);background:rgba(255,68,102,.05)}
 
-.hdr-right{display:flex;align-items:center;gap:12px}
-.hdr-link{
-  font-size:11px;color:var(--dim);text-decoration:none;
-  letter-spacing:.04em;transition:color .2s;white-space:nowrap;
+/* ── HEADER RIGHT ── */
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:var(--r8);
+  background:transparent;border:1px solid var(--line2);
+  color:var(--dim);font-size:14px;cursor:pointer;
+  transition:all .2s;text-decoration:none;
 }
+.hdr-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,170,.06)}
+.hdr-link{font-size:11px;color:var(--dim);text-decoration:none;letter-spacing:.04em;transition:color .2s;white-space:nowrap}
 .hdr-link:hover{color:var(--g)}
 
 .conn{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dim)}
 .conn-dot{
   width:6px;height:6px;border-radius:50%;
   background:var(--g);
+  box-shadow:0 0 6px rgba(0,255,170,.4);
   animation:pulse 2s ease infinite;
 }
-.conn-dot.off{background:var(--r);box-shadow:0 0 5px rgba(255,85,85,.4);animation:none}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,136,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(0,255,136,0)}}
+.conn-dot.off{background:var(--r);box-shadow:0 0 5px rgba(255,68,102,.4);animation:none}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,170,.4)}60%{opacity:.7;box-shadow:0 0 0 5px rgba(0,255,170,0)}}
 
-/* ── MAIN BODY ── */
-.body{
-  display:grid;
-  grid-template-columns:var(--sb) 1fr;
-  overflow:hidden;
-  height:100%;
+/* ── SAVE INDICATOR (subtle corner chip, not a bar) ── */
+.save-chip{
+  position:fixed;bottom:80px;right:16px;
+  background:var(--bg2);border:1px solid var(--line2);
+  border-radius:100px;
+  padding:4px 10px 4px 8px;
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;color:var(--dim);
+  z-index:100;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .3s,transform .3s;
+  pointer-events:none;
 }
+.save-chip.vis{opacity:1;transform:translateY(0);pointer-events:auto}
+.save-chip-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0}
 
-/* ── SIDEBAR ── */
+/* ── BODY ── */
+.body{display:grid;grid-template-columns:var(--sb) 1fr;overflow:hidden;height:100%}
+
+/* ══════════════════════════════════
+   SIDEBAR
+══════════════════════════════════ */
 .sb{
   border-right:1px solid var(--line);
-  background:var(--bg1);
+  background:rgba(12,12,26,.97);
   display:flex;flex-direction:column;
   overflow:hidden;
   animation:sbi .5s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes sbi{from{transform:translateX(-16px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sbi{from{transform:translateX(-20px);opacity:0}to{transform:none;opacity:1}}
 
 .sb-section{
   padding:14px 16px;
   border-bottom:1px solid var(--line);
   flex-shrink:0;
 }
-
 .sb-label{
-  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;
   color:var(--mute);margin-bottom:10px;font-weight:600;
 }
 
 /* ── CUSTOM SELECT ── */
+.cs-wrap{position:relative}
 .cs-trigger{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
   padding:8px 10px;
-  background:var(--bg2);
-  border:1px solid var(--line2);
-  cursor:pointer;
-  min-height:38px;
-  border-radius:var(--r8);
+  background:var(--bg2);border:1px solid var(--line2);
+  cursor:pointer;min-height:40px;border-radius:var(--r8);
   transition:border-color .2s,box-shadow .2s;
   user-select:none;
 }
-.cs-trigger:hover,.cs.open .cs-trigger{
-  border-color:var(--g);
-  box-shadow:0 0 0 1px rgba(0,255,136,.12),inset 0 0 10px rgba(0,255,136,.03);
+.cs-wrap.open .cs-trigger,.cs-trigger:hover{
+  border-color:rgba(0,255,170,.4);
+  box-shadow:0 0 0 1px rgba(0,255,170,.08),inset 0 0 12px rgba(0,255,170,.025);
 }
 .cs-inner{display:flex;flex-direction:column;gap:2px;overflow:hidden;flex:1;min-width:0}
 .cs-val{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cs-sub{font-size:9px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cs-arr{color:var(--dim);font-size:8px;flex-shrink:0;transition:transform .25s,color .2s}
-.cs.open .cs-arr{transform:rotate(180deg);color:var(--g)}
+.cs-wrap.open .cs-arr{transform:rotate(180deg);color:var(--g)}
 
 .cs-dropdown{
-  position:absolute;
-  top:calc(100% + 4px);left:0;right:0;
-  background:var(--bg2);
-  border:1px solid var(--g);
-  box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,136,.06);
-  z-index:100;
-  max-height:220px;
-  flex-direction:column;
-  display:none;
-  border-radius:var(--r8);
-  overflow:hidden;
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--bg2);border:1px solid rgba(0,255,170,.3);
+  box-shadow:0 16px 48px rgba(0,0,0,.8),0 0 0 1px rgba(0,255,170,.05);
+  z-index:200;max-height:230px;
+  flex-direction:column;display:none;
+  border-radius:var(--r8);overflow:hidden;
 }
-.cs.open .cs-dropdown{display:flex;animation:di .18s cubic-bezier(.16,1,.3,1)}
-@keyframes di{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.cs-wrap.open .cs-dropdown{display:flex;animation:di .18s cubic-bezier(.16,1,.3,1)}
+@keyframes di{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
 
 .cs-search{
-  padding:7px 9px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:6px;
-  flex-shrink:0;
+  padding:7px 10px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
 }
-.cs-search-icon{font-size:10px;color:var(--dim)}
+.cs-search-icon{font-size:11px;color:var(--dim)}
 .cs-search input{
   flex:1;background:transparent;border:none;outline:none;
   color:var(--text);font-family:var(--mono);font-size:11px;
   caret-color:var(--g);
 }
 .cs-search input::placeholder{color:var(--mute)}
-
 .cs-options{overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--mute) transparent}
 .cs-options::-webkit-scrollbar{width:2px}
 .cs-options::-webkit-scrollbar-thumb{background:var(--mute);border-radius:1px}
@@ -210,16 +262,15 @@ body::before{
   padding:7px 10px;cursor:pointer;
   font-size:10.5px;color:var(--dim);
   border-left:2px solid transparent;
-  transition:all .12s;
+  transition:all .1s;
   display:flex;align-items:center;gap:6px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.cs-opt:hover{background:rgba(0,255,136,.05);color:var(--text);border-left-color:var(--g);padding-left:12px}
-.cs-opt.sel{background:rgba(0,255,136,.08);color:var(--g);border-left-color:var(--g)}
+.cs-opt:hover{background:rgba(0,255,170,.04);color:var(--text);border-left-color:var(--g);padding-left:12px}
+.cs-opt.sel{background:rgba(0,255,170,.07);color:var(--g);border-left-color:var(--g)}
 .cs-opt.rec{color:var(--b)}
-.cs-opt.rec:hover,.cs-opt.rec.sel{color:var(--b);border-left-color:var(--b);background:rgba(0,200,255,.06)}
-.cs-opt-dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.6;flex-shrink:0;transition:transform .12s}
-.cs-opt:hover .cs-opt-dot{transform:scale(1.5)}
+.cs-opt.rec:hover,.cs-opt.rec.sel{color:var(--b);border-left-color:var(--b);background:rgba(0,180,255,.06)}
+.cs-opt-dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.6;flex-shrink:0}
 .cs-nores{padding:12px 10px;font-size:11px;color:var(--mute);text-align:center;font-style:italic}
 
 .model-count{font-size:10px;color:var(--mute);margin-top:7px}
@@ -240,51 +291,53 @@ body::before{
   width:13px;height:13px;background:var(--mute);
   transition:all .25s;border-radius:50%;
 }
-.toggle input:checked+.t-track{background:rgba(0,255,136,.12);border-color:var(--g)}
-.toggle input:checked~.t-thumb{background:var(--g);transform:translateX(17px);box-shadow:0 0 6px rgba(0,255,136,.4)}
+.toggle input:checked+.t-track{background:rgba(0,255,170,.12);border-color:var(--g)}
+.toggle input:checked~.t-thumb{background:var(--g);transform:translateX(17px);box-shadow:0 0 8px rgba(0,255,170,.5)}
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stat{
   background:var(--bg2);border:1px solid var(--line);
   padding:10px;border-radius:var(--r8);
-  transition:all .25s;
+  transition:all .2s;
 }
-.stat:hover{border-color:var(--g);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,255,136,.06)}
-.stat-val{font-size:20px;font-weight:700;color:var(--g);line-height:1}
-.stat-key{font-size:9px;color:var(--mute);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.stat:hover{border-color:rgba(0,255,170,.2);transform:translateY(-1px)}
+.stat-val{font-size:22px;font-weight:700;color:var(--g);line-height:1}
+.stat-key{font-size:8.5px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
 
 /* ── CLEAR BTN ── */
 .btn-clear{
   width:100%;padding:8px;
   background:transparent;border:1px solid var(--line2);
   color:var(--dim);font-family:var(--mono);font-size:11px;
-  cursor:pointer;letter-spacing:.08em;text-transform:uppercase;
-  transition:all .2s;border-radius:var(--r8);
-  position:relative;overflow:hidden;
+  cursor:pointer;letter-spacing:.07em;text-transform:uppercase;
+  transition:all .2s;border-radius:var(--r8);overflow:hidden;
 }
-.btn-clear:hover{border-color:var(--r);color:var(--r);background:rgba(255,85,85,.05)}
+.btn-clear:hover{border-color:var(--r);color:var(--r);background:rgba(255,68,102,.04)}
 .btn-clear:active{transform:scale(.97)}
 
 /* ── INFO PANEL ── */
 .info-panel{
-  padding:12px 16px;font-size:10px;color:var(--mute);
-  line-height:1.8;flex:1;overflow-y:auto;
+  padding:14px 16px;font-size:10px;color:var(--mute);
+  line-height:1.85;flex:1;overflow-y:auto;
   scrollbar-width:thin;scrollbar-color:var(--mute) transparent;
 }
 .info-panel::-webkit-scrollbar{width:2px}
 .info-panel code{
-  color:var(--b);background:rgba(0,200,255,.07);
+  color:var(--b);background:rgba(0,180,255,.07);
   padding:1px 5px;font-size:9.5px;border-radius:3px;
 }
-.info-title{color:var(--dim);font-weight:600;letter-spacing:.05em;margin-bottom:5px;font-size:10px}
+.info-title{color:var(--dim);font-weight:700;letter-spacing:.05em;margin-bottom:4px;font-size:10px;margin-top:12px}
+.info-title:first-child{margin-top:0}
 
-/* ── CHAT AREA ── */
+/* ══════════════════════════════════
+   CHAT AREA
+══════════════════════════════════ */
 .chat{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);position:relative}
 
 #msgs{
   flex:1;overflow-y:auto;
-  padding:20px 20px 8px;
+  padding:20px 24px 8px;
   display:flex;flex-direction:column;gap:0;
   scrollbar-width:thin;scrollbar-color:var(--mute) transparent;
 }
@@ -293,30 +346,30 @@ body::before{
 
 /* ── MESSAGES ── */
 .msg{
-  display:grid;grid-template-columns:68px 1fr;gap:0 14px;
-  padding:12px 0;
-  border-bottom:1px solid rgba(255,255,255,.04);
-  animation:me .3s cubic-bezier(.16,1,.3,1) both;
+  display:grid;grid-template-columns:72px 1fr;gap:0 16px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.035);
+  animation:me .35s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes me{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes me{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 .msg-role{
-  font-size:9px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;padding-top:3px;text-align:right;
+  font-size:8.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding-top:4px;text-align:right;
   flex-shrink:0;
 }
 .msg-role.user{color:var(--b)}
 .msg-role.assistant{color:var(--g)}
 .msg-role.sys{color:var(--mute)}
 
-.msg-body{font-size:13px;line-height:1.75;color:var(--text);word-break:break-word}
+.msg-body{font-size:13.5px;line-height:1.8;color:var(--text);word-break:break-word}
 .msg-body.sys{color:var(--mute);font-style:italic;font-size:11px}
-.msg-body code{background:var(--bg2);border:1px solid var(--line2);padding:1px 5px;font-size:12px;color:var(--b);border-radius:3px}
+.msg-body code{background:var(--bg2);border:1px solid var(--line2);padding:1px 6px;font-size:12px;color:var(--b);border-radius:3px}
 .msg-body pre{
   background:var(--bg1);border:1px solid var(--line);
   border-left:2px solid var(--g);
-  padding:12px;margin:10px 0;overflow-x:auto;
-  font-size:12px;line-height:1.6;position:relative;
+  padding:14px;margin:10px 0;overflow-x:auto;
+  font-size:12px;line-height:1.65;position:relative;
   border-radius:0 var(--r8) var(--r8) 0;
   scrollbar-width:thin;scrollbar-color:var(--mute) transparent;
   transition:border-left-color .2s;
@@ -325,14 +378,14 @@ body::before{
 .msg-body pre::-webkit-scrollbar{height:3px}
 .msg-body pre::-webkit-scrollbar-thumb{background:var(--mute);border-radius:1px}
 .msg-body pre code{background:none;border:none;padding:0;color:var(--text);font-size:inherit}
-.msg-body strong{color:var(--text);font-weight:600}
+.msg-body strong{color:var(--text);font-weight:700}
 .msg-body em{font-style:italic;color:var(--dim)}
-.msg-body h3{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text);margin:8px 0 4px}
-.msg-body ul{margin:6px 0 6px 16px}
-.msg-body li{margin:2px 0}
-.msg-body a{color:var(--b);text-decoration:none;border-bottom:1px solid rgba(0,200,255,.3);transition:border-color .2s}
+.msg-body h3{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--text);margin:10px 0 4px}
+.msg-body ul{margin:6px 0 6px 18px}
+.msg-body li{margin:3px 0}
+.msg-body a{color:var(--b);text-decoration:none;border-bottom:1px solid rgba(0,180,255,.3);transition:border-color .2s}
 .msg-body a:hover{border-bottom-color:var(--b)}
-.msg-body blockquote{border-left:2px solid var(--p);padding-left:10px;color:var(--dim);margin:6px 0;font-style:italic}
+.msg-body blockquote{border-left:2px solid var(--p);padding-left:12px;color:var(--dim);margin:8px 0;font-style:italic}
 
 /* ── COPY BTN ── */
 .copy-btn{
@@ -343,81 +396,98 @@ body::before{
   opacity:0;transition:all .15s;z-index:2;
 }
 .msg-body pre:hover .copy-btn{opacity:1}
-.copy-btn:hover{border-color:var(--b);color:var(--b);background:rgba(0,200,255,.08)}
-.copy-btn.ok{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.08)}
+.copy-btn:hover{border-color:var(--b);color:var(--b)}
+.copy-btn.ok{border-color:var(--g);color:var(--g)}
 
 /* ── CURSOR ── */
 .cursor{
-  display:inline-block;width:7px;height:13px;
-  background:var(--g);animation:blink .8s step-end infinite;
-  vertical-align:text-bottom;margin-left:1px;border-radius:1px;
+  display:inline-block;width:7px;height:14px;
+  background:var(--g);animation:blink .75s step-end infinite;
+  vertical-align:text-bottom;margin-left:2px;border-radius:1px;
 }
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ── TYPING ── */
-.typing{display:flex;gap:3px;align-items:center;height:18px;padding:2px 0}
+.typing{display:flex;gap:4px;align-items:center;height:20px;padding:2px 0}
 .typing span{
   width:5px;height:5px;border-radius:50%;background:var(--b);
-  animation:tb 1.2s ease-in-out infinite;opacity:.4;
+  animation:tb 1.2s ease-in-out infinite;opacity:.3;
 }
 .typing span:nth-child(2){animation-delay:.15s}
 .typing span:nth-child(3){animation-delay:.3s}
-@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-4px);opacity:1}}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-5px);opacity:1}}
 
-/* ── WELCOME ── */
+/* ══════════════════════════════════
+   WELCOME SCREEN
+══════════════════════════════════ */
 .welcome{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:1;gap:14px;color:var(--mute);text-align:center;padding:32px 20px;
-  animation:wi .5s cubic-bezier(.16,1,.3,1) both;
+  flex:1;gap:18px;text-align:center;padding:32px 24px;
+  animation:wi .6s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes wi{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes wi{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 
-.welcome-icon{font-size:36px;animation:ws 4s linear infinite}
-@keyframes ws{
-  0%{transform:rotate(0);filter:drop-shadow(0 0 6px rgba(0,255,136,.3))}
-  25%{filter:drop-shadow(0 0 10px rgba(0,200,255,.4))}
-  50%{transform:rotate(180deg);filter:drop-shadow(0 0 6px rgba(0,255,136,.3))}
-  75%{filter:drop-shadow(0 0 10px rgba(176,106,255,.3))}
-  100%{transform:rotate(360deg);filter:drop-shadow(0 0 6px rgba(0,255,136,.3))}
+/* ── BIG WELCOME LOGO ── */
+.welcome-logo{
+  position:relative;
+  width:72px;height:72px;
+  display:flex;align-items:center;justify-content:center;
 }
+.welcome-logo svg{width:72px;height:72px}
+.w-ring1,.w-ring2,.w-ring3{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:1px solid transparent;
+}
+.w-ring1{border-top-color:rgba(0,255,170,.5);border-right-color:rgba(0,255,170,.15);animation:lr 3s linear infinite}
+.w-ring2{inset:6px;border-bottom-color:rgba(0,180,255,.4);border-left-color:rgba(0,180,255,.1);animation:lr 4.5s linear infinite reverse}
+.w-ring3{inset:13px;border-top-color:rgba(170,102,255,.3);animation:lr 7s linear infinite}
 
 .welcome-ascii{
-  font-size:9.5px;line-height:1.5;color:var(--mute);
-  letter-spacing:.04em;white-space:pre;opacity:.4;transition:opacity .3s;
+  font-size:9px;line-height:1.6;color:var(--mute);
+  letter-spacing:.06em;white-space:pre;opacity:.35;
+  transition:opacity .3s;
 }
-.welcome-ascii:hover{opacity:.8}
+.welcome-ascii:hover{opacity:.7}
 
 .welcome h2{
-  font-family:var(--sans);font-size:22px;font-weight:700;color:var(--text);
-  animation:tg 4s ease-in-out infinite alternate;
+  font-family:var(--sans);font-size:26px;font-weight:800;color:var(--text);
+  letter-spacing:-.02em;
 }
-@keyframes tg{from{text-shadow:0 0 12px rgba(0,255,136,.15)}to{text-shadow:0 0 24px rgba(0,255,136,.3)}}
-.welcome h2 span{color:var(--g)}
-.welcome p{font-size:12px;max-width:380px;line-height:1.7;color:var(--dim)}
+.welcome h2 span{
+  background:linear-gradient(90deg,var(--g),var(--b) 60%,var(--p));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.welcome p{font-size:12px;max-width:400px;line-height:1.8;color:var(--dim)}
 
-.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:6px}
 .chip{
-  font-size:11px;padding:6px 13px;
+  font-size:11px;padding:6px 14px;
   border:1px solid var(--line2);color:var(--dim);
   cursor:pointer;transition:all .2s;background:var(--bg1);
-  border-radius:var(--r8);
+  border-radius:100px;
 }
-.chip:hover{border-color:var(--b);color:var(--b);background:rgba(0,200,255,.05);transform:translateY(-1px)}
+.chip:hover{
+  border-color:rgba(0,180,255,.35);color:var(--b);
+  background:rgba(0,180,255,.05);transform:translateY(-1px);
+  box-shadow:0 4px 20px rgba(0,180,255,.06);
+}
 .chip:active{transform:scale(.97)}
 
-/* ── INPUT AREA ── */
+/* ══════════════════════════════════
+   INPUT AREA
+══════════════════════════════════ */
 .input-area{
   border-top:1px solid var(--line);
-  padding:12px 16px calc(12px + var(--safe-b));
+  padding:12px 18px calc(12px + var(--safe-b));
   display:flex;flex-direction:column;gap:8px;
-  background:var(--bg1);
-  position:relative;
-  flex-shrink:0;
+  background:rgba(12,12,26,.97);
+  position:relative;flex-shrink:0;
 }
 .input-area::before{
   content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--g),transparent);
-  opacity:.25;
+  background:linear-gradient(90deg,transparent,var(--g) 40%,var(--b) 60%,transparent);
+  opacity:.2;
 }
 
 .input-row{display:flex;gap:8px;align-items:flex-end}
@@ -427,54 +497,60 @@ body::before{
   transition:border-color .2s,box-shadow .2s;border-radius:var(--r8);
 }
 .input-wrap:focus-within{
-  border-color:var(--g);
-  box-shadow:0 0 0 1px rgba(0,255,136,.08),inset 0 0 10px rgba(0,255,136,.02);
+  border-color:rgba(0,255,170,.35);
+  box-shadow:0 0 0 1px rgba(0,255,170,.07),inset 0 0 16px rgba(0,255,170,.015);
 }
 
 textarea{
   flex:1;background:transparent;border:none;
   color:var(--text);font-family:var(--mono);font-size:13px;
   padding:10px 12px;resize:none;outline:none;
-  min-height:42px;max-height:140px;line-height:1.5;
+  min-height:44px;max-height:140px;line-height:1.55;
 }
 textarea::placeholder{color:var(--mute)}
 
 .send-btn{
-  padding:10px 18px;
-  background:linear-gradient(135deg,var(--g),#00cc6a);
-  border:none;color:#000;font-family:var(--mono);font-size:12px;
-  font-weight:700;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;
-  transition:all .2s;min-width:68px;align-self:stretch;
-  border-radius:var(--r8);
-  position:relative;overflow:hidden;
+  padding:10px 20px;
+  background:linear-gradient(135deg,var(--g),var(--g2));
+  border:none;color:#000;font-family:var(--mono);font-size:11px;
+  font-weight:700;cursor:pointer;letter-spacing:.07em;text-transform:uppercase;
+  transition:all .2s;min-width:70px;align-self:stretch;
+  border-radius:var(--r8);position:relative;overflow:hidden;
 }
-.send-btn::before{
+.send-btn::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent,rgba(255,255,255,.2),transparent);
-  transform:translateX(-100%);transition:transform .4s;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,.25),transparent);
+  transform:translateX(-100%);transition:transform .5s;
 }
-.send-btn:hover{background:linear-gradient(135deg,#00e077,#00ff88);box-shadow:0 0 18px rgba(0,255,136,.28);transform:translateY(-1px)}
-.send-btn:hover::before{transform:translateX(100%)}
+.send-btn:hover{
+  background:linear-gradient(135deg,#00ffcc,var(--g));
+  box-shadow:0 0 24px rgba(0,255,170,.3),0 4px 12px rgba(0,0,0,.3);
+  transform:translateY(-1px);
+}
+.send-btn:hover::after{transform:translateX(100%)}
 .send-btn:active{transform:scale(.97)}
-.send-btn:disabled{background:var(--bg3);color:var(--mute);cursor:not-allowed;box-shadow:none;transform:none}
-.send-btn:disabled::before{display:none}
+.send-btn:disabled{
+  background:var(--bg3);color:var(--mute);
+  cursor:not-allowed;box-shadow:none;transform:none;
+}
+.send-btn:disabled::after{display:none}
 
 .input-footer{
   display:flex;justify-content:space-between;align-items:center;
-  font-size:9.5px;color:var(--mute);letter-spacing:.04em;
+  font-size:9px;color:var(--mute);letter-spacing:.04em;
 }
 .hints{display:flex;gap:12px;flex-wrap:wrap}
 .hints span{display:flex;align-items:center;gap:3px;white-space:nowrap}
 kbd{
   border:1px solid var(--line2);background:var(--bg3);
-  padding:1px 4px;font-family:var(--mono);font-size:8.5px;
-  color:var(--dim);border-radius:3px;transition:all .15s;
+  padding:1px 4px;font-family:var(--mono);font-size:8px;
+  color:var(--dim);border-radius:3px;
 }
-kbd:hover{border-color:var(--g);color:var(--g)}
 
 .status-dot{
-  display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--g);animation:pulse 2s ease infinite;margin-right:4px;
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--g);box-shadow:0 0 5px rgba(0,255,170,.4);
+  animation:pulse 2s ease infinite;margin-right:4px;
 }
 
 /* ── SCROLL BTN ── */
@@ -488,84 +564,63 @@ kbd:hover{border-color:var(--g);color:var(--g)}
   transition:all .25s;
 }
 .scroll-btn.vis{opacity:1;transform:translateX(-50%) translateY(0)}
-.scroll-btn:hover{border-color:var(--b);box-shadow:0 0 12px rgba(0,200,255,.15)}
+.scroll-btn:hover{border-color:var(--b);box-shadow:0 0 14px rgba(0,180,255,.15)}
 
 /* ── RATE LIMIT ── */
 .rl-overlay{
   display:none;position:absolute;inset:0;
-  background:rgba(8,8,16,.88);backdrop-filter:blur(6px);
+  background:rgba(7,7,15,.9);backdrop-filter:blur(8px);
   z-index:50;align-items:center;justify-content:center;
-  flex-direction:column;gap:12px;
+  flex-direction:column;gap:14px;
 }
 .rl-overlay.on{display:flex;animation:fi .3s ease}
 @keyframes fi{from{opacity:0}to{opacity:1}}
-.rl-title{font-family:var(--sans);font-size:18px;color:var(--r);animation:rp 1s ease-in-out infinite}
-@keyframes rp{0%,100%{opacity:1}50%{opacity:.6}}
-.rl-timer{font-size:40px;font-weight:700;color:var(--g);font-family:var(--mono)}
+.rl-title{font-family:var(--sans);font-size:20px;font-weight:700;color:var(--r)}
+.rl-timer{font-size:44px;font-weight:700;color:var(--g);font-family:var(--mono)}
 .rl-btn{
-  padding:8px 22px;background:transparent;border:1px solid var(--r);
+  padding:8px 24px;background:transparent;border:1px solid var(--r);
   color:var(--r);font-family:var(--mono);font-size:11px;cursor:pointer;
   letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r8);transition:all .2s;
 }
-.rl-btn:hover{background:rgba(255,85,85,.1);box-shadow:0 0 10px rgba(255,85,85,.15)}
+.rl-btn:hover{background:rgba(255,68,102,.08)}
 
 /* ── RETRY ── */
 .retry-btn{
   display:inline-flex;align-items:center;gap:5px;
-  padding:4px 10px;background:rgba(255,85,85,.08);
+  padding:4px 10px;background:rgba(255,68,102,.07);
   border:1px solid var(--r);color:var(--r);font-family:var(--mono);
   font-size:11px;cursor:pointer;border-radius:var(--r4);
-  transition:all .2s;margin-top:6px;
+  transition:all .2s;margin-top:8px;
 }
-.retry-btn:hover{background:rgba(255,85,85,.15)}
+.retry-btn:hover{background:rgba(255,68,102,.14)}
 
 /* ── TOASTS ── */
 .toast-wrap{
   position:fixed;bottom:20px;right:16px;
   display:flex;flex-direction:column-reverse;gap:7px;
-  z-index:200;pointer-events:none;max-width:300px;
+  z-index:200;pointer-events:none;max-width:280px;
 }
 .toast{
-  padding:9px 14px;font-size:11.5px;font-family:var(--mono);
+  padding:9px 14px;font-size:11px;font-family:var(--mono);
   border-radius:var(--r8);pointer-events:auto;cursor:pointer;
-  transition:all .25s;opacity:0;transform:translateX(100%);
+  transition:all .25s;opacity:0;transform:translateX(110%);
   max-width:100%;word-break:break-word;
+  backdrop-filter:blur(12px);
 }
 .toast.in{opacity:1;transform:translateX(0)}
-.toast.out{opacity:0;transform:translateX(100%)}
-.toast.info{background:var(--bg2);border:1px solid var(--b);color:var(--b)}
-.toast.warn{background:rgba(255,85,85,.08);border:1px solid var(--r);color:var(--r)}
-.toast.error{background:rgba(255,85,85,.1);border:1px solid var(--r);color:var(--r)}
-.toast.success{background:rgba(0,255,136,.08);border:1px solid var(--g);color:var(--g)}
+.toast.out{opacity:0;transform:translateX(110%)}
+.toast.info{background:rgba(12,12,26,.95);border:1px solid rgba(0,180,255,.3);color:var(--b)}
+.toast.warn{background:rgba(12,12,26,.95);border:1px solid rgba(255,204,68,.3);color:var(--y)}
+.toast.error{background:rgba(12,12,26,.95);border:1px solid rgba(255,68,102,.3);color:var(--r)}
+.toast.success{background:rgba(12,12,26,.95);border:1px solid rgba(0,255,170,.3);color:var(--g)}
 .toast-x{float:right;cursor:pointer;opacity:.4;margin-left:8px;transition:opacity .15s}
 .toast-x:hover{opacity:1}
-
-/* ── SAVE BAR ── */
-.save-bar{
-  position:fixed;top:0;left:0;right:0;
-  background:var(--bg1);border-bottom:1px solid var(--line);
-  padding:7px 16px;display:flex;align-items:center;
-  justify-content:space-between;font-size:11px;color:var(--dim);
-  z-index:500;transform:translateY(-100%);
-  transition:transform .3s;backdrop-filter:blur(12px);
-}
-.save-bar.vis{transform:translateY(0)}
-.save-acts{display:flex;gap:7px}
-.save-btn{
-  padding:3px 10px;border:1px solid var(--line2);background:transparent;
-  color:var(--dim);font-family:var(--mono);font-size:9.5px;
-  cursor:pointer;border-radius:var(--r4);transition:all .15s;
-  text-transform:uppercase;letter-spacing:.05em;
-}
-.save-btn:hover{border-color:var(--g);color:var(--g)}
-.save-btn.pri{border-color:var(--g);color:var(--g)}
-.save-btn.del:hover{border-color:var(--r);color:var(--r)}
 
 /* ── SKELETON ── */
 .skel{
   background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
   background-size:200% 100%;
-  animation:ss 1.5s ease-in-out infinite;
+  animation:ss 1.4s ease-in-out infinite;
   border-radius:var(--r4);
 }
 @keyframes ss{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -575,7 +630,7 @@ kbd:hover{border-color:var(--g);color:var(--g)}
   display:none;
   width:34px;height:34px;border-radius:var(--r8);
   background:var(--bg2);border:1px solid var(--line2);
-  color:var(--text);font-size:16px;
+  color:var(--text);font-size:15px;
   align-items:center;justify-content:center;cursor:pointer;
   transition:all .2s;flex-shrink:0;
 }
@@ -583,11 +638,8 @@ kbd:hover{border-color:var(--g);color:var(--g)}
 
 /* ── MOBILE BACKDROP ── */
 .sb-backdrop{
-  display:none;
-  position:fixed;inset:0;z-index:19;
-  background:rgba(0,0,0,.6);
-  pointer-events:none;
-  opacity:0;transition:opacity .25s;
+  display:none;position:fixed;inset:0;z-index:19;
+  background:rgba(0,0,0,.65);pointer-events:none;opacity:0;transition:opacity .25s;
 }
 .sb-backdrop.vis{opacity:1;pointer-events:auto}
 
@@ -601,52 +653,44 @@ kbd:hover{border-color:var(--g);color:var(--g)}
 .pba .prov-dot{background:#ffd700}
 .px .prov-dot{background:#10a37f}
 
-/* ═══════════ MOBILE STYLES ═══════════ */
+/* ═══════════ MOBILE ═══════════ */
 @media(max-width:720px){
-  :root{--hdr:50px;--sb:80vw}
-
+  :root{--hdr:50px;--sb:82vw}
   .body{grid-template-columns:1fr}
   .hdr-badges{display:none}
-
-  /* sidebar slides over — hidden by default */
   .sb{
     position:fixed;top:var(--hdr);left:0;bottom:0;
-    width:min(var(--sb), 300px);
+    width:min(var(--sb), 310px);
     z-index:20;
     transform:translateX(-100%);
     transition:transform .28s cubic-bezier(.16,1,.3,1);
-    box-shadow:4px 0 24px rgba(0,0,0,.5);
-    border-right:1px solid var(--line);
-    animation:none; /* disable entrance animation on mobile */
+    box-shadow:6px 0 30px rgba(0,0,0,.6);
+    animation:none;
   }
   .sb.mobile-open{transform:translateX(0)}
-  /* show the backdrop element itself only on mobile */
   .sb-backdrop{display:block}
   .sb-toggle{display:flex}
   .chat{grid-column:1}
-
-  #msgs{padding:14px 12px 6px}
-  .msg{grid-template-columns:52px 1fr;gap:0 10px;padding:10px 0}
+  #msgs{padding:14px 14px 6px}
+  .msg{grid-template-columns:56px 1fr;gap:0 10px;padding:10px 0}
   .msg-role{font-size:8px}
-  .msg-body{font-size:12.5px}
-
+  .msg-body{font-size:13px}
   .input-area{padding:10px 12px calc(10px + var(--safe-b))}
   textarea{font-size:13px;padding:9px 10px}
-  .send-btn{min-width:60px;padding:9px 14px;font-size:11px}
+  .send-btn{min-width:60px;padding:9px 14px;font-size:10.5px}
   .hints{display:none}
-
-  .welcome{padding:24px 16px;gap:12px}
-  .welcome h2{font-size:19px}
-  .welcome-icon{font-size:30px}
+  .welcome{padding:24px 16px;gap:14px}
+  .welcome h2{font-size:22px}
+  .welcome-logo{width:60px;height:60px}
+  .welcome-logo svg{width:60px;height:60px}
   .chips{gap:6px}
-  .chip{font-size:10.5px;padding:5px 11px}
-
-  .toast-wrap{bottom:16px;right:12px;max-width:260px}
-  .toast{font-size:11px}
+  .chip{font-size:10.5px;padding:5px 12px}
+  .toast-wrap{bottom:14px;right:10px;max-width:250px}
 }
 
 @media(max-width:400px){
-  .logo-name{font-size:13px}
+  .logo-name{font-size:14px}
+  .logo-tag{display:none}
   .hdr-link{display:none}
   .conn{display:none}
 }
@@ -656,156 +700,198 @@ kbd:hover{border-color:var(--g);color:var(--g)}
 
 <div class="shell">
 
-  <!-- HEADER -->
-  <header class="hdr">
-    <div class="logo">
-      <!-- Mobile sidebar toggle -->
-      <button class="sb-toggle" id="sbToggle" aria-label="Open sidebar">☰</button>
-      <div class="logo-mark">K∞</div>
-      <span class="logo-name">Kilo<em>Free</em></span>
-    </div>
-    <div class="hdr-badges">
-      <span class="badge bg">No Auth</span>
-      <span class="badge bb">OpenAI Compat</span>
-      <span class="badge br">Zero Cost</span>
-    </div>
-    <div class="hdr-right">
-      <a class="hdr-link" href="https://github.com/izaart95-jpg/Kilo-Free-API" target="_blank" rel="noopener">GitHub ↗</a>
-      <div class="conn" role="status" aria-live="polite">
-        <span class="conn-dot" id="connDot"></span>
-        <span id="connLabel">Online</span>
+<!-- ═══ HEADER ═══ -->
+<header class="hdr">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="sb-toggle" id="sbToggle" aria-label="Open sidebar">☰</button>
+
+    <!-- LOGO -->
+    <a class="logo" href="#" onclick="return false">
+      <div class="logo-svg-wrap">
+        <div class="logo-ring"></div>
+        <!-- SVG Logo: hex node symbol with K -->
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Hex background -->
+          <polygon points="16,2 28,9 28,23 16,30 4,23 4,9"
+            fill="rgba(0,255,170,0.07)"
+            stroke="rgba(0,255,170,0.35)"
+            stroke-width="1"
+          />
+          <!-- Inner K letter mark -->
+          <line x1="11" y1="9" x2="11" y2="23" stroke="#00ffaa" stroke-width="2.2" stroke-linecap="round"/>
+          <line x1="11" y1="16" x2="21" y2="9" stroke="#00ffaa" stroke-width="2.2" stroke-linecap="round"/>
+          <line x1="11" y1="16" x2="21" y2="23" stroke="#00ffaa" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- Center dot -->
+          <circle cx="11" cy="16" r="2" fill="#00ffaa" opacity=".7"/>
+        </svg>
       </div>
-    </div>
-  </header>
-
-  <!-- BODY -->
-  <div class="body">
-
-    <!-- BACKDROP for mobile -->
-    <div class="sb-backdrop" id="sbBackdrop"></div>
-
-    <!-- SIDEBAR -->
-    <aside class="sb" id="sidebar">
-
-      <div class="sb-section">
-        <div class="sb-label">Model</div>
-        <div id="modelWrap" style="position:relative">
-          <div id="modelLoading">
-            <div class="skel" style="height:38px;border-radius:8px;margin-bottom:7px"></div>
-            <div style="display:flex;gap:7px">
-              <div class="skel" style="height:9px;flex:1;border-radius:2px"></div>
-              <div class="skel" style="height:9px;width:36px;border-radius:2px"></div>
-            </div>
-          </div>
-        </div>
-        <div class="model-count" id="modelCount" aria-live="polite"></div>
+      <div class="logo-text-group">
+        <span class="logo-name">Kilo<em>Free</em></span>
+        <span class="logo-tag">AI&nbsp;Playground</span>
       </div>
-
-      <div class="sb-section">
-        <div class="sb-label">Options</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Streaming</span>
-          <label class="toggle">
-            <input type="checkbox" id="streamToggle" checked>
-            <div class="t-track"></div>
-            <div class="t-thumb"></div>
-          </label>
-        </div>
-      </div>
-
-      <div class="sb-section">
-        <div class="sb-label">Session</div>
-        <div class="stats-grid" role="status">
-          <div class="stat"><div class="stat-val" id="statMsgs">0</div><div class="stat-key">Messages</div></div>
-          <div class="stat"><div class="stat-val" id="statTokens">0</div><div class="stat-key">Tokens</div></div>
-        </div>
-      </div>
-
-      <div class="sb-section">
-        <button class="btn-clear" id="clearBtn">⌫ &nbsp;Clear Chat</button>
-      </div>
-
-      <div class="info-panel">
-        <div class="info-title">// About</div>
-        Direct access to free LLMs via<br>
-        <code>api.kilo.ai</code> — no signup,<br>
-        no API key, no cost.<br><br>
-        <div class="info-title">// Endpoints</div>
-        <code>/chat/completions</code><br>
-        OpenAI-compatible<br><br>
-        <code>/messages</code><br>
-        Anthropic-compatible<br><br>
-        <div class="info-title">// Notes</div>
-        Occasional <code>429</code> errors expected.<br>
-        It's free — just retry.
-      </div>
-
-    </aside>
-
-    <!-- CHAT -->
-    <main class="chat">
-
-      <div id="msgs" role="log" aria-live="polite">
-        <div class="welcome" id="welcome">
-          <div class="welcome-icon">⚡</div>
-          <div class="welcome-ascii">╔══════════════════════╗
-║  FREE · OPEN · READY ║
-╚══════════════════════╝</div>
-          <h2>Ask <span>anything</span></h2>
-          <p>No API key required. Select a model and start chatting with free LLMs directly in your browser.</p>
-          <div class="chips">
-            <div class="chip" tabindex="0" onclick="setPrompt('Explain quantum entanglement simply')" onkeydown="if(event.key==='Enter')setPrompt('Explain quantum entanglement simply')">Quantum entanglement</div>
-            <div class="chip" tabindex="0" onclick="setPrompt('Write a Python function to reverse a linked list')" onkeydown="if(event.key==='Enter')setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
-            <div class="chip" tabindex="0" onclick="setPrompt('What are the best practices for REST API design?')" onkeydown="if(event.key==='Enter')setPrompt('What are the best practices for REST API design?')">REST API practices</div>
-            <div class="chip" tabindex="0" onclick="setPrompt('Write a haiku about open source software')" onkeydown="if(event.key==='Enter')setPrompt('Write a haiku about open source software')">Haiku about open source</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rate limit overlay -->
-      <div class="rl-overlay" id="rlOverlay" role="alert">
-        <div class="rl-title">⏳ Rate Limited</div>
-        <div class="rl-timer" id="rlTimer">0s</div>
-        <button class="rl-btn" onclick="retryAfterCooldown()">Try Again</button>
-      </div>
-
-      <!-- Scroll to bottom -->
-      <div class="scroll-btn" id="scrollBtn" onclick="scrollToBottom()" aria-label="Scroll to bottom">↓</div>
-
-      <!-- INPUT -->
-      <div class="input-area">
-        <div class="input-row">
-          <div class="input-wrap">
-            <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for newline)" rows="1" autocomplete="off"></textarea>
-          </div>
-          <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
-        </div>
-        <div class="input-footer">
-          <div class="hints">
-            <span><kbd>Enter</kbd> send</span>
-            <span><kbd>Shift</kbd>+<kbd>Enter</kbd> newline</span>
-            <span><kbd>/</kbd> focus</span>
-          </div>
-          <span id="statusText"><span class="status-dot"></span>Ready</span>
-        </div>
-      </div>
-
-    </main>
+    </a>
   </div>
+
+  <div class="hdr-badges">
+    <span class="badge bg">No Auth</span>
+    <span class="badge bb">OpenAI Compat</span>
+    <span class="badge br">Zero Cost</span>
+  </div>
+
+  <div class="hdr-right">
+    <!-- Save button (replaces annoying save bar) -->
+    <button class="hdr-btn" id="saveBtn" title="Save chat" onclick="saveChat(); toast('Chat saved','success',2000)">💾</button>
+    <!-- Load -->
+    <button class="hdr-btn" id="loadBtn" title="Load saved chat" onclick="loadFromStorage()">📂</button>
+    <!-- Export -->
+    <button class="hdr-btn" title="Export JSON" onclick="exportChat()">⬇</button>
+    <a class="hdr-link" href="https://github.com/izaart95-jpg/Kilo-Free-API" target="_blank" rel="noopener">GitHub ↗</a>
+    <div class="conn" role="status" aria-live="polite">
+      <span class="conn-dot" id="connDot"></span>
+      <span id="connLabel">Online</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ BODY ═══ -->
+<div class="body">
+
+  <div class="sb-backdrop" id="sbBackdrop"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sb" id="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-label">Model</div>
+      <div id="modelWrap" style="position:relative">
+        <div id="modelLoading">
+          <div class="skel" style="height:40px;border-radius:8px;margin-bottom:7px"></div>
+          <div style="display:flex;gap:7px">
+            <div class="skel" style="height:8px;flex:1;border-radius:2px"></div>
+            <div class="skel" style="height:8px;width:36px;border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="model-count" id="modelCount" aria-live="polite"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Options</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Streaming</span>
+        <label class="toggle">
+          <input type="checkbox" id="streamToggle" checked>
+          <div class="t-track"></div>
+          <div class="t-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Session</div>
+      <div class="stats-grid" role="status">
+        <div class="stat"><div class="stat-val" id="statMsgs">0</div><div class="stat-key">Messages</div></div>
+        <div class="stat"><div class="stat-val" id="statTokens">0</div><div class="stat-key">Tokens</div></div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <button class="btn-clear" id="clearBtn">⌫ &nbsp;Clear Chat</button>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-title">// About</div>
+      Direct access to free LLMs via<br>
+      <code>api.kilo.ai</code> — no signup,<br>
+      no API key, no cost.<br>
+      <div class="info-title">// Endpoints</div>
+      <code>/chat/completions</code><br>
+      OpenAI-compatible<br><br>
+      <code>/messages</code><br>
+      Anthropic-compatible<br>
+      <div class="info-title">// Notes</div>
+      Occasional <code>429</code> errors expected.<br>
+      It's free — just retry.
+    </div>
+
+  </aside>
+
+  <!-- CHAT -->
+  <main class="chat">
+
+    <div id="msgs" role="log" aria-live="polite">
+      <div class="welcome" id="welcome">
+
+        <!-- Big animated logo -->
+        <div class="welcome-logo">
+          <div class="w-ring1"></div>
+          <div class="w-ring2"></div>
+          <div class="w-ring3"></div>
+          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="36,6 62,21 62,51 36,66 10,51 10,21"
+              fill="rgba(0,255,170,0.06)"
+              stroke="rgba(0,255,170,0.3)"
+              stroke-width="1.5"
+            />
+            <line x1="26" y1="22" x2="26" y2="50" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+            <line x1="26" y1="36" x2="46" y2="22" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+            <line x1="26" y1="36" x2="46" y2="50" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="26" cy="36" r="4" fill="#00ffaa" opacity=".65"/>
+          </svg>
+        </div>
+
+        <div class="welcome-ascii">┌─────────────────────────┐
+│  FREE · OPEN · READY   │
+└─────────────────────────┘</div>
+        <h2>Ask <span>anything</span></h2>
+        <p>No API key required. Select a model and start chatting with free LLMs directly in your browser.</p>
+        <div class="chips">
+          <div class="chip" tabindex="0" onclick="setPrompt('Explain quantum entanglement simply')" onkeydown="if(event.key==='Enter')setPrompt('Explain quantum entanglement simply')">Quantum entanglement</div>
+          <div class="chip" tabindex="0" onclick="setPrompt('Write a Python function to reverse a linked list')" onkeydown="if(event.key==='Enter')setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
+          <div class="chip" tabindex="0" onclick="setPrompt('What are the best practices for REST API design?')" onkeydown="if(event.key==='Enter')setPrompt('What are the best practices for REST API design?')">REST API practices</div>
+          <div class="chip" tabindex="0" onclick="setPrompt('Write a haiku about open source software')" onkeydown="if(event.key==='Enter')setPrompt('Write a haiku about open source software')">Haiku about open source</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rate limit overlay -->
+    <div class="rl-overlay" id="rlOverlay" role="alert">
+      <div class="rl-title">⏳ Rate Limited</div>
+      <div class="rl-timer" id="rlTimer">0s</div>
+      <button class="rl-btn" onclick="retryAfterCooldown()">Try Again</button>
+    </div>
+
+    <div class="scroll-btn" id="scrollBtn" onclick="scrollToBottom()" aria-label="Scroll to bottom">↓</div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for newline)" rows="1" autocomplete="off"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+      </div>
+      <div class="input-footer">
+        <div class="hints">
+          <span><kbd>Enter</kbd> send</span>
+          <span><kbd>Shift</kbd>+<kbd>Enter</kbd> newline</span>
+          <span><kbd>/</kbd> focus</span>
+        </div>
+        <span id="statusText"><span class="status-dot"></span>Ready</span>
+      </div>
+    </div>
+
+  </main>
+</div>
 </div>
 
 <!-- Toasts -->
 <div class="toast-wrap" id="toastWrap" role="alert" aria-live="assertive"></div>
 
-<!-- Save bar -->
-<div class="save-bar" id="saveBar">
-  <span id="saveBarText">💾 Saved</span>
-  <div class="save-acts">
-    <button class="save-btn" onclick="exportChat()">JSON</button>
-    <button class="save-btn" onclick="exportChat('txt')">TXT</button>
-    <button class="save-btn pri" onclick="loadFromStorage()">Load</button>
-    <button class="save-btn del" onclick="clearSavedChat()">Delete</button>
-  </div>
+<!-- Subtle save chip (replaces old save bar) -->
+<div class="save-chip" id="saveChip">
+  <div class="save-chip-dot"></div>
+  <span id="saveChipText">Saved</span>
 </div>
 
 <script>
@@ -821,7 +907,6 @@ let history = [], isLoading = false, totalTokens = 0, msgCount = 0;
 let currentModel = 'kilo-auto/free', allModels = [];
 let abortCtrl = null, rlTimer = null, rlReset = 0;
 
-// ── Provider ───────────────────────────────────────────────────────────────
 function provCls(id) {
   if (id.includes('nvidia')) return 'pn';
   if (id.includes('poolside')) return 'pp';
@@ -832,7 +917,6 @@ function provCls(id) {
   return '';
 }
 
-// ── HARDCODED FALLBACKS ───────────────────────────────────────────────────
 const FALLBACK = [
   'nvidia/nemotron-3-super-120b-a12b:free','poolside/laguna-m.1:free',
   'inclusionai/ring-2.6-1t:free','stepfun/step-3.5-flash:free',
@@ -841,7 +925,6 @@ const FALLBACK = [
   'x-ai/grok-code-fast-1:optimized:free',
 ];
 
-// ── LOAD MODELS ────────────────────────────────────────────────────────────
 async function loadModels() {
   try {
     const res = await fetch(px1(`${KILO_BASE}/models`));
@@ -856,12 +939,11 @@ async function loadModels() {
   }
 }
 
-// ── CUSTOM SELECT ──────────────────────────────────────────────────────────
 function buildSelect(models) {
   allModels = models;
   const wrap = document.getElementById('modelWrap');
   wrap.innerHTML = `
-    <div class="cs" id="cs">
+    <div class="cs-wrap" id="csWrap">
       <div class="cs-trigger" id="csTrigger">
         <div class="cs-inner">
           <span class="cs-val" id="csVal">⚡ kilo-auto/free</span>
@@ -877,17 +959,19 @@ function buildSelect(models) {
         <div class="cs-options" id="csOpts" role="listbox"></div>
       </div>
     </div>`;
-
   renderOpts('');
-  const cs = document.getElementById('cs');
+  const csw = document.getElementById('csWrap');
   document.getElementById('csTrigger').addEventListener('click', e => {
     e.stopPropagation();
-    const open = cs.classList.toggle('open');
+    const open = csw.classList.toggle('open');
     if (open) document.getElementById('csSearch').focus();
   });
   document.getElementById('csSearch').addEventListener('input', e => renderOpts(e.target.value));
-  document.getElementById('csSearch').addEventListener('keydown', e => { if(e.key==='Escape') cs.classList.remove('open'); e.stopPropagation(); });
-  document.addEventListener('click', () => cs.classList.remove('open'));
+  document.getElementById('csSearch').addEventListener('keydown', e => {
+    if(e.key==='Escape') csw.classList.remove('open');
+    e.stopPropagation();
+  });
+  document.addEventListener('click', () => csw.classList.remove('open'));
   document.getElementById('csDrop').addEventListener('click', e => e.stopPropagation());
 }
 
@@ -924,7 +1008,7 @@ function pickModel(id, label, sub) {
   currentModel = id;
   document.getElementById('csVal').textContent = label;
   document.getElementById('csSub').textContent = sub||'';
-  document.getElementById('cs').classList.remove('open');
+  document.getElementById('csWrap').classList.remove('open');
   const si = document.getElementById('csSearch');
   if (si) { si.value=''; renderOpts(''); }
   document.querySelectorAll('.cs-opt').forEach(o => o.classList.toggle('sel', o.dataset.id===id));
@@ -932,7 +1016,7 @@ function pickModel(id, label, sub) {
   closeMobileSidebar();
 }
 
-// ── MARKDOWN ───────────────────────────────────────────────────────────────
+// ── MARKDOWN ──
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function render(text) {
@@ -954,7 +1038,6 @@ function render(text) {
   return text;
 }
 
-// ── COPY ───────────────────────────────────────────────────────────────────
 async function cpCode(btn) {
   const code = btn.parentElement.textContent.replace('copy','').replace('✓','').trim();
   try { await navigator.clipboard.writeText(code); } catch { fbCopy(code); }
@@ -966,7 +1049,6 @@ function fbCopy(text) {
   document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
 }
 
-// ── ADD MESSAGE ────────────────────────────────────────────────────────────
 function addMsg(role, content='', streaming=false) {
   const w=document.getElementById('welcome');if(w)w.remove();
   hideRL();
@@ -993,7 +1075,6 @@ function addMsg(role, content='', streaming=false) {
   }
 }
 
-// ── SCROLL ─────────────────────────────────────────────────────────────────
 function autoScroll() {
   const m=document.getElementById('msgs');
   const sb=document.getElementById('scrollBtn');
@@ -1013,7 +1094,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   },{passive:true});
 });
 
-// ── SEND ───────────────────────────────────────────────────────────────────
 async function sendMessage() {
   const inp=document.getElementById('input');
   const text=inp.value.trim();
@@ -1047,7 +1127,6 @@ async function sendMessage() {
         body:JSON.stringify({model,messages:history,max_tokens:2048,stream:true})
       });
       if(!res.ok){if(res.status===429){handleRL(res);throw new Error('Rate limited (429)')}throw new Error(`HTTP ${res.status}`)}
-
       const reader=res.body.getReader(),dec=new TextDecoder();
       let full='';
       while(true){
@@ -1112,7 +1191,6 @@ function retryLast(){
 
 function setPrompt(t){document.getElementById('input').value=t;document.getElementById('input').focus();}
 
-// ── RATE LIMIT ─────────────────────────────────────────────────────────────
 function handleRL(res){
   const ra=parseInt(res.headers.get('x-ratelimit-reset-requests')||res.headers.get('retry-after'),10)||15;
   rlReset=Date.now()+ra*1000;
@@ -1136,13 +1214,29 @@ function retryAfterCooldown(){
   hideRL();sendMessage();
 }
 
-// ── STORAGE ────────────────────────────────────────────────────────────────
+// ── STORAGE — no more annoying save bar ──
+let saveChipTimer = null;
 function saveChat(){
   try{
     localStorage.setItem(SKEY,JSON.stringify({history,msgCount,totalTokens,currentModel,ts:Date.now()}));
-    updateSaveBar();
+    showSaveChip();
   }catch{}
 }
+function showSaveChip(){
+  const chip=document.getElementById('saveChip');
+  const txt=document.getElementById('saveChipText');
+  try{
+    const raw=localStorage.getItem(SKEY);
+    if(raw){
+      const d=JSON.parse(raw);
+      txt.textContent=`${d.history?.length||0} msgs saved`;
+    }
+  }catch{txt.textContent='Saved';}
+  chip.classList.add('vis');
+  clearTimeout(saveChipTimer);
+  saveChipTimer=setTimeout(()=>chip.classList.remove('vis'),2500);
+}
+
 function loadFromStorage(){
   try{
     const raw=localStorage.getItem(SKEY);
@@ -1166,22 +1260,11 @@ function exportChat(fmt='json'){
     toast(`Exported as ${fmt.toUpperCase()}`,'success');
   }catch{toast('Export failed','error');}
 }
-function clearSavedChat(){localStorage.removeItem(SKEY);updateSaveBar();toast('Saved chat deleted','info');}
-function updateSaveBar(){
-  const bar=document.getElementById('saveBar'),t=document.getElementById('saveBarText');
-  try{
-    const raw=localStorage.getItem(SKEY);
-    if(raw){
-      const d=JSON.parse(raw);
-      t.textContent=`💾 ${d.history?.length||0} messages saved at ${new Date(d.ts).toLocaleTimeString()}`;
-      bar.classList.add('vis');
-      clearTimeout(bar._h);bar._h=setTimeout(()=>bar.classList.remove('vis'),5000);
-    }else bar.classList.remove('vis');
-  }catch{bar.classList.remove('vis');}
-}
+
+// Auto-load on start
 if(localStorage.getItem(SKEY))setTimeout(loadFromStorage,600);
 
-// ── TOAST ──────────────────────────────────────────────────────────────────
+// ── TOAST ──
 function toast(msg,sev='info',dur=4000){
   const c=document.getElementById('toastWrap');
   const el=document.createElement('div');
@@ -1198,7 +1281,7 @@ function dismissToast(x){
   clearTimeout(el._t);setTimeout(()=>el.remove(),300);
 }
 
-// ── CONNECTION ─────────────────────────────────────────────────────────────
+// ── CONNECTION ──
 function updateConn(){
   const d=document.getElementById('connDot'),l=document.getElementById('connLabel');
   if(navigator.onLine){d.className='conn-dot';l.textContent='Online';}
@@ -1207,35 +1290,30 @@ function updateConn(){
 window.addEventListener('online',updateConn);
 window.addEventListener('offline',updateConn);
 
-// ── MOBILE SIDEBAR ─────────────────────────────────────────────────────────
+// ── MOBILE SIDEBAR ──
 function openMobileSidebar(){
   document.getElementById('sidebar').classList.add('mobile-open');
   document.getElementById('sbBackdrop').classList.add('vis');
-  document.getElementById('sbToggle').textContent = '✕';
+  document.getElementById('sbToggle').textContent='✕';
 }
 function closeMobileSidebar(){
   document.getElementById('sidebar').classList.remove('mobile-open');
   document.getElementById('sbBackdrop').classList.remove('vis');
-  document.getElementById('sbToggle').textContent = '☰';
+  document.getElementById('sbToggle').textContent='☰';
 }
-document.getElementById('sbToggle').addEventListener('click', e => {
+document.getElementById('sbToggle').addEventListener('click',e=>{
   e.stopPropagation();
-  if (document.getElementById('sidebar').classList.contains('mobile-open')) {
-    closeMobileSidebar();
-  } else {
-    openMobileSidebar();
-  }
+  document.getElementById('sidebar').classList.contains('mobile-open')?closeMobileSidebar():openMobileSidebar();
 });
-document.getElementById('sbBackdrop').addEventListener('click', closeMobileSidebar);
+document.getElementById('sbBackdrop').addEventListener('click',closeMobileSidebar);
 
-// ── KEYBOARD ───────────────────────────────────────────────────────────────
+// ── KEYBOARD ──
 document.addEventListener('keydown',e=>{
   const inp=document.getElementById('input');
   const focused=document.activeElement===inp;
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();sendMessage();return;}
-  if(e.shiftKey&&(e.ctrlKey||e.metaKey)&&e.key==='K'){e.preventDefault();document.getElementById('clearBtn').click();return;}
   if(e.key==='/'&&!focused){e.preventDefault();inp.focus();return;}
-  if(e.key==='Escape'){document.getElementById('cs')?.classList.remove('open');closeMobileSidebar();}
+  if(e.key==='Escape'){document.getElementById('csWrap')?.classList.remove('open');closeMobileSidebar();}
 });
 
 document.getElementById('input').addEventListener('keydown',function(e){
@@ -1249,7 +1327,7 @@ document.getElementById('input').addEventListener('focus',()=>{
   if(window.innerWidth<=720)setTimeout(()=>document.getElementById('input').scrollIntoView({behavior:'smooth',block:'nearest'}),300);
 });
 
-// ── CLEAR ──────────────────────────────────────────────────────────────────
+// ── CLEAR ──
 document.getElementById('clearBtn').addEventListener('click',()=>{
   if(!history.length)return;
   if(!confirm('Clear all chat history?'))return;
@@ -1258,26 +1336,36 @@ document.getElementById('clearBtn').addEventListener('click',()=>{
   document.getElementById('statTokens').textContent='0';
   if(abortCtrl){abortCtrl.abort();abortCtrl=null;}
   document.getElementById('msgs').innerHTML=`<div class="welcome" id="welcome">
-    <div class="welcome-icon">⚡</div>
-    <div class="welcome-ascii">╔══════════════════════╗
-║  FREE · OPEN · READY ║
-╚══════════════════════╝</div>
+    <div class="welcome-logo">
+      <div class="w-ring1"></div><div class="w-ring2"></div><div class="w-ring3"></div>
+      <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="36,6 62,21 62,51 36,66 10,51 10,21" fill="rgba(0,255,170,0.06)" stroke="rgba(0,255,170,0.3)" stroke-width="1.5"/>
+        <line x1="26" y1="22" x2="26" y2="50" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+        <line x1="26" y1="36" x2="46" y2="22" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+        <line x1="26" y1="36" x2="46" y2="50" stroke="#00ffaa" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="26" cy="36" r="4" fill="#00ffaa" opacity=".65"/>
+      </svg>
+    </div>
+    <div class="welcome-ascii">┌─────────────────────────┐
+│  FREE · OPEN · READY   │
+└─────────────────────────┘</div>
     <h2>Ask <span>anything</span></h2>
     <p>No API key required. Select a model and start chatting with free LLMs.</p>
     <div class="chips">
-      <div class="chip" tabindex="0" onclick="setPrompt('Explain quantum entanglement simply')">Quantum entanglement</div>
-      <div class="chip" tabindex="0" onclick="setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
-      <div class="chip" tabindex="0" onclick="setPrompt('What are the best practices for REST API design?')">REST API practices</div>
-      <div class="chip" tabindex="0" onclick="setPrompt('Write a haiku about open source software')">Haiku about open source</div>
+      <div class="chip" onclick="setPrompt('Explain quantum entanglement simply')">Quantum entanglement</div>
+      <div class="chip" onclick="setPrompt('Write a Python function to reverse a linked list')">Reverse a linked list</div>
+      <div class="chip" onclick="setPrompt('What are the best practices for REST API design?')">REST API practices</div>
+      <div class="chip" onclick="setPrompt('Write a haiku about open source software')">Haiku about open source</div>
     </div>
   </div>`;
-  localStorage.removeItem(SKEY);updateSaveBar();toast('Chat cleared','info');
+  localStorage.removeItem(SKEY);
+  document.getElementById('saveChip').classList.remove('vis');
+  toast('Chat cleared','info');
   closeMobileSidebar();
 });
 
-// ── INIT ───────────────────────────────────────────────────────────────────
 loadModels();
-console.log('%c⚡ KiloFree Playground','font-family:"Space Grotesk",sans-serif;font-size:16px;color:#00ff88;font-weight:700;');
+console.log('%c⬡ KiloFree','font-family:"Syne",sans-serif;font-size:18px;color:#00ffaa;font-weight:800;');
 </script>
 </body>
 </html>
